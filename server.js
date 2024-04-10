@@ -28,7 +28,7 @@ app.use(
 
 const { Pool } = pg;
 
-const connectionString = process.env.DB_URL;
+const connectionString = process.env.DATABASE_URL;
 const db = new Pool({
   connectionString: connectionString,
   // If you're using a service like Heroku, you might need this for SSL:
