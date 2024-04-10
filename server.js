@@ -8,9 +8,11 @@ import cookieParser from "cookie-parser";
 import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
+import dotenv from 'dotenv'
 
 const app = express();
 const port = process.env.port || 3000;
+dotenv.config()
 const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
@@ -24,13 +26,17 @@ app.use(
 );
 
 
-const db = new pg.Client({
-  user: "postgres",
-  host: "localhost",
-  database: "instagram",
-  password: "Tushar@work",
-  port: 5432,
+const { Pool } = pg;
+
+const connectionString = process.env.DB_URL;
+const db = new Pool({
+  connectionString: connectionString,
+  // If you're using a service like Heroku, you might need this for SSL:
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
+
 db.connect();
 
 app.use(cookieParser());
@@ -241,7 +247,6 @@ app.get("/api/reels", async (req, res) => {
 
 app.post('/api/reset',async (req,res)=>{
   const result = await db.query("SELECT * FROM users WHERE email = $1",[req.body.email])
-  console.log(result.rows);
   if (result.rows.length > 0) {
     emailOtp = Math.round(1000+Math.random()*9000)
     registeredEmail = req.body.email
@@ -255,7 +260,6 @@ app.post('/api/reset',async (req,res)=>{
 
 app.post('/api/resetpassword', async (req,res)=>{
 const {password1, OTP} = req.body;
-console.log('i am calling',req.body, emailOtp, registeredEmail);
 if (OTP == emailOtp) {
   
   try {
@@ -331,21 +335,17 @@ app.get("/api/post/:id", async (req, res) => {
       req.params.id,
     ]);
     res.send(result.rows[0]);
-    console.log(result.rows[0]);
   } catch (error) {
     res.send(error);
   }
 });
 
 app.get("/api/reel/:id", async (req, res) => {
-  console.log(req.params.id);
   try {
     let result = await db.query("SELECT * FROM instareels WHERE id = $1", [
       req.params.id,
     ]);
-    console.log(result.rows[0]);
     res.send(result.rows[0]);
-    console.log(result.rows[0]);
   } catch (error) {
     console.log(error);
     res.send(error);
@@ -357,7 +357,6 @@ app.get("/api/reel/:id", async (req, res) => {
 app.get('/api/like/:id',async(req,res)=>{
  let id = req.params.id
  if (req.session.user) {
-  console.log("liking");
 try {
     await db.query('UPDATE instapost SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
 } catch (error) {
@@ -373,7 +372,6 @@ res.json(true)
 app.get('/api/dislike/:id',async(req,res)=>{
  let id = req.params.id
  if (req.session.user) {
-  console.log("disliking");
 try {
     await db.query('UPDATE instapost SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
 } catch (error) {
