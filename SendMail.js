@@ -18,7 +18,7 @@ const info = await transporter.sendMail({
     to: email, // list of receivers
     subject: "Account Verify", // Subject line
     text: "Hello world?", // plain text body
-    html: `<b>Your Verification Code for IG Clone is ${OTP}</b>`, // html body
+    html: `<b>Your Code for Tushar's IG Clone is ${OTP}</b>`, // html body
   });
 
   console.log("Message sent: %s", info.messageId);
