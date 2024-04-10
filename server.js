@@ -19,7 +19,7 @@ let registeredEmail = null
 
 app.use(
   cors({
-    origin: "",
+    origin: "https://igclone-sepia.vercel.app/",
     methods: ["POST", "GET"],
     credentials: true,
   })
