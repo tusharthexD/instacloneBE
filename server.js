@@ -49,6 +49,10 @@ app.use(
   })
 );
 
+app.get('/',(req,res)=>{
+  res.send('Created by Tushar')
+})
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
