@@ -17,22 +17,13 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-const allowedOrigins = ['https://igclone-sepia.vercel.app/', 'http://localhost:5173/'];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Check if the request origin is in the allowed origins array or if it's a valid CORS preflight request
-    if (!origin || allowedOrigins.includes(origin) || origin === 'null') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-
+app.use(
+  cors({
+    origin: "http://localhost:5173/",
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
 
 
 const { Pool } = pg;
