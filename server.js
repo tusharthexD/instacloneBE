@@ -17,16 +17,7 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-app.use(cors({
-  origin: ['https://instagramclone-drab.vercel.app','http://localhost:5173'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Custom-Header'],
-  exposedHeaders: ['Content-Disposition'], // Example of exposing specific headers
-  credentials: true,
-}));
-
-// Handle OPTIONS requests for preflight
-app.options('*', cors());
+app.use(cors());
 
 const { Pool } = pg;
 
@@ -51,9 +42,6 @@ app.use(
   })
 );
 
-app.get('/',(req,res)=>{
-  res.send('Created by Tushar')
-})
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -90,21 +78,18 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
          })
          .run()
  } catch (error) {
-  res.send(error)
+  res.json(error)
  }
 });
 
 
 
-
-
-
-app.get("/api/islogged", (req, res) => {
+app.get("/api/", (req, res) => {
   if (req.session.user) {
     let { username, profile } = req.session.user;
-    res.send({ isLoggedin: true, user: username, profile: profile });
+    res.json({ isLoggedin: true, user: username, profile: profile });
   } else {
-    res.send({ isLoggedin: false });
+    res.json({ isLoggedin: false });
   }
 });
 
@@ -131,9 +116,9 @@ app.post("/api/profile", async (req, res) => {
                      if(ress) data.isFollowed = true
                     }}
                       
-      res.send(data)
+      res.json(data)
   } else {
-   res.send(null);
+   res.json(null);
   }
 
 
@@ -144,7 +129,7 @@ app.post("/api/profile/posts", async (req, res) => {
   const result = await db.query("SELECT * FROM instapost WHERE username = $1", [
     req.body.id,
   ]);
-  res.send(result.rows);
+  res.json(result.rows);
 });
 
 app.get('/api/profile/edit',async (req,res)=>{
@@ -154,9 +139,9 @@ app.get('/api/profile/edit',async (req,res)=>{
     [req.session.user.username]
   )
     result.rows[0].password = undefined
-    res.send(result.rows[0])
+    res.json(result.rows[0])
   } else {
-    res.send(null)
+    res.json(null)
   }
 })
 //update profile
@@ -170,14 +155,14 @@ app.post('/api/profile/edit',async (req,res)=>{
      await db.query(
      "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
      [fname, lname,bio,website, req.session.user.username])
-     res.send("Changes Saved")
+     res.json("Changes Saved")
 
    } catch (error) {
     console.log(error)
-    res.send(error)
+    res.json(error)
    }
   } else {
-    res.send('cahnges failed')
+    res.json('cahnges failed')
   }
 })
 
@@ -192,10 +177,10 @@ app.post("/api/addpost", async (req, res) => {
       "INSERT INTO instapost(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
       [id, req.session.user.username, post, [], caption, [], time]
     );
-    res.send("success");
+    res.json("success");
   } catch (error) {
     console.log(error);
-    res.send(error);
+    res.json(error);
   }
 });
 
@@ -210,10 +195,10 @@ app.post("/api/addreel", async (req, res) => {
       "INSERT INTO instareels(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
       [id, req.session.user.username, post, [], caption, [], time]
     );
-    res.send("success");
+    res.json("success");
   } catch (error) {
     console.log(error);
-    res.send(error);
+    res.json(error);
   }
 });
 
@@ -225,7 +210,7 @@ app.post("/api/search", async (req, res) => {
       "SELECT username,profile from users WHERE LOWER(username) LIKE '%' || $1 || '%'",
       [req.body.search]
     );
-    res.send(result.rows);
+    res.json(result.rows);
   } catch (error) {
     console.log(error);
   }
@@ -234,20 +219,22 @@ app.post("/api/search", async (req, res) => {
 
 // post
 app.get("/api/posts", async (req, res) => {
+  console.log('calling');
+
   try {
     const result = await db.query("SELECT * from instapost JOIN users ON instapost.username = users.username ");
-    res.send(result.rows);
+    res.json(result.rows);
   } catch (error) {
-    res.send(error)
+    res.json(error)
   }
 });
 
 app.get("/api/reels", async (req, res) => {
   try {
     const result = await db.query("SELECT * from instareels JOIN users ON instareels.username = users.username");
-    res.send(result.rows);
+    res.json(result.rows);
   } catch (error) {
-    res.send(error)
+    res.json(error)
   }
 });
 
@@ -258,9 +245,9 @@ app.post('/api/reset',async (req,res)=>{
     registeredEmail = req.body.email
     console.log(emailOtp);
     SendMail(emailOtp , registeredEmail)
-    res.send(true)
+    res.json(true)
   } else {
-    res.send(false)
+    res.json(false)
   }
 })
 
@@ -272,24 +259,24 @@ if (OTP == emailOtp) {
     bcrypt.hash(password1, saltRound, async (err, hash) => {
             if (err) {
               console.log(err);
-              res.send(false)
+              res.json(false)
             } else {
               await db.query(
                 "UPDATE users SET password = $1 WHERE email = $2",
                 [hash, registeredEmail]
               );
-              res.send(true)
+              res.json(true)
              
             }
           });
   
     } catch (error) {
       console.log('not working');
-      res.send(false);
+      res.json(false);
     }
 }
 else{
-  res.send(false)
+  res.json(false)
 }
 })
 
@@ -300,16 +287,16 @@ try {
   result.rows[0].password = null
   result.rows[0].email = null
   
-  res.send(result.rows[0])
+  res.json(result.rows[0])
 } catch (error) {
-  res.send(error)
+  res.json(error)
 }
 
 })
 
 app.get('/api/stories',async (req,res)=>{
   const result = await db.query('SELECT instastory.username, id, story, profile FROM instastory JOIN users on instastory.username = users.username')
-  res.send(result.rows)
+  res.json(result.rows)
 
 })
 
@@ -323,13 +310,13 @@ if (req.session.user) {
   await db.query('INSERT INTO instastory(story,time,username,id,viewer,type) VALUES($1,$2,$3,$4,$5,$6)',[
     story, time, req.session.user.username, id, [], type 
   ])
-res.send('Successfully Uploaded')
+res.json('Successfully Uploaded')
     
   } catch (error) {
-    res.send('Technical Error')
+    res.json('Technical Error')
   }
 } else {
-res.send('Login First')
+res.json('Login First')
 }
 })
 
@@ -340,9 +327,9 @@ app.get("/api/post/:id", async (req, res) => {
     let result = await db.query("SELECT * FROM instapost WHERE id = $1", [
       req.params.id,
     ]);
-    res.send(result.rows[0]);
+    res.json(result.rows[0]);
   } catch (error) {
-    res.send(error);
+    res.json(error);
   }
 });
 
@@ -351,10 +338,10 @@ app.get("/api/reel/:id", async (req, res) => {
     let result = await db.query("SELECT * FROM instareels WHERE id = $1", [
       req.params.id,
     ]);
-    res.send(result.rows[0]);
+    res.json(result.rows[0]);
   } catch (error) {
     console.log(error);
-    res.send(error);
+    res.json(error);
   }
 });
 
@@ -368,10 +355,10 @@ try {
 } catch (error) {
   console.log(error);
 } 
-res.send(true)
+res.json(true)
 
  } else {
-  res.send(false)
+  res.json(false)
  }
 })
 //dislike
@@ -383,10 +370,10 @@ try {
 } catch (error) {
   console.log(error);
 } 
-res.send(false)
+res.json(false)
 
  } else {
-  res.send(false)
+  res.json(false)
  }
 })
 
@@ -404,12 +391,12 @@ app.post("/api/addcomment/:id", async (req, res) => {
         "UPDATE instapost SET comments = ARRAY_APPEND(comments,$1) WHERE id = $2",
         [comment, id]
       );
-      res.send("success");
+      res.json("success");
     } catch (error) {
       console.log(error);
     }
   } else {
-    res.send("log in first")
+    res.json("log in first")
   }
 });
 
@@ -422,10 +409,10 @@ app.get('/api/likeReel/:id',async(req,res)=>{
  } catch (error) {
    console.log(error);
  } 
- res.send(true)
+ res.json(true)
  
   } else {
-   res.send(false)
+   res.json(false)
   }
  })
  //dislike
@@ -437,10 +424,10 @@ app.get('/api/likeReel/:id',async(req,res)=>{
  } catch (error) {
    console.log(error);
  } 
- res.send(false)
+ res.json(false)
  
   } else {
-   res.send(false)
+   res.json(false)
   }
  })
  
@@ -457,12 +444,12 @@ app.get('/api/likeReel/:id',async(req,res)=>{
         "UPDATE instareels SET comments = ARRAY_APPEND(comments,$1) WHERE id = $2",
         [comment, id]
       );
-      res.send("success");
+      res.json("success");
     } catch (error) {
       console.log(error);
     }
   } else {
-    res.send("log in first")
+    res.json("log in first")
   }
  });
  
@@ -481,9 +468,9 @@ app.post("/api/follow", async (req, res) => {
       "UPDATE userdata SET following = ARRAY_APPEND(following,$1) WHERE username = $2",
       [user, req.session.user.username]
     );
-    res.send("followed");
+    res.json("followed");
   } else {
-    res.send("req failed");
+    res.json("req failed");
   }
 });
 
@@ -498,9 +485,9 @@ app.post("/api/unfollow", async (req, res) => {
       "UPDATE userdata SET following = ARRAY_REMOVE(following,$1) WHERE username = $2",
       [user, req.session.user.username]
     );
-    res.send("unfollowed");
+    res.json("unfollowed");
   } else {
-    res.send("req failed");
+    res.json("req failed");
   }
 });
 
@@ -523,7 +510,7 @@ if (OTP == emailOtp) {
         if (mail.rows.length === 0) {
           bcrypt.hash(password, saltRound, async (err, hash) => {
             if (err) {
-              res.send("Technical Error");
+              res.json("Technical Error");
             } else {
               await db.query(
                 "INSERT INTO users(username,password,email) VALUES($1, $2, $3)",
@@ -535,18 +522,18 @@ if (OTP == emailOtp) {
               );
             }
           });
-          res.send("USER CREATED");
+          res.json("USER CREATED");
         } else {
-          res.send("Email already registered");
+          res.json("Email already registered");
         }
       } else {
-        res.send("USER ALREADY EXIST");
+        res.json("USER ALREADY EXIST");
       }
     } catch (error) {
-      res.send(error);
+      res.json(error);
     }
 } else {
-  res.send('Wrong OTP')
+  res.json('Wrong OTP')
 }
 });
 
@@ -555,7 +542,7 @@ app.post('/api/emailRegistration',(req,res)=>{
   emailOtp = Math.round(1000+Math.random()*9000)
   registeredEmail = req.body.email
   SendMail(emailOtp , registeredEmail)
-  res.send(true)
+  res.json(true)
 })
 
 
@@ -573,15 +560,15 @@ app.post("/api/login", async (req, res) => {
       bcrypt.compare(password, loginPsw, (err, valid) => {
         if (valid) {
           req.session.user = result.rows[0];
-          res.send({
+          res.json({
             isLoggedin: true,
             message:
               "You're Logged in",
           });
         } else if (err) {
-          res.send({ isLoggedin: false, message: err });
+          res.json({ isLoggedin: false, message: err });
         } else {
-          res.send({
+          res.json({
             isLoggedin: false,
             message:
               "Sorry, your password was incorrect. Please double-check your password.",
@@ -589,10 +576,10 @@ app.post("/api/login", async (req, res) => {
         }
       });
     } else {
-      res.send({ isLoggedin: false, message: "User doesn't exist." });
+      res.json({ isLoggedin: false, message: "User doesn't exist." });
     }
   } catch (error) {
-    res.send({ isLoggedin: false, message: "User not exist" });
+    res.json({ isLoggedin: false, message: "User not exist" });
   }
 });
 
@@ -601,7 +588,7 @@ app.post("/api/login", async (req, res) => {
 // for logout
 app.get("/api/logout", (req, res) => {
   req.session.user = null;
-  res.send({ isLoggedin: false });
+  res.json({ isLoggedin: false });
 });
 
 
