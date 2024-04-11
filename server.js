@@ -570,7 +570,6 @@ app.post('/api/emailRegistration',(req,res)=>{
 
 // for login
 app.post("/api/login", async (req, res) => {
-  console.log('i am calling');
   const { username, password } = req.body;
   try {
     const result = await db.query("SELECT * FROM users WHERE username = $1", [
@@ -581,6 +580,7 @@ app.post("/api/login", async (req, res) => {
     if (result.rows.length > 0) {
       bcrypt.compare(password, loginPsw, (err, valid) => {
         if (valid) {
+          console.log(result.rows[0],'sucess');
           req.session.user = result.rows[0];
           res.json({
             isLoggedin: true,
@@ -588,8 +588,10 @@ app.post("/api/login", async (req, res) => {
               "You're Logged in",
           });
         } else if (err) {
+          console.log('not sucess');
           res.json({ isLoggedin: false, message: err });
         } else {
+          console.log('failed');
           res.json({
             isLoggedin: false,
             message:
