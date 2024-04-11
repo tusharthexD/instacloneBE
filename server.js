@@ -17,13 +17,7 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-app.use(
-  cors({
-    origin: "http://localhost:5173/",
-    methods: ["POST", "GET"],
-    credentials: true,
-  })
-);
+app.use(cors());
 
 
 const { Pool } = pg;
