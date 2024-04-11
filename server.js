@@ -17,12 +17,12 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-// app.use(cors({
-//   origin: 'https://instagramclone.netlify.app',
-//   credentials: true // Allow credentials (e.g., cookies, authorization headers)
-// }));
+const allowedOrigins = ['https://instagramclone.netlify.app', 'https://instagramclone-drab.vercel.app', 'http://localhost:5173'];
+app.use(cors({
+  origin: allowedOrigins,
+}));
 
-app.use(cors());
+
 const { Pool } = pg;
 
 const connectionString = process.env.DATABASE_URL;
