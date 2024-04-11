@@ -9,6 +9,8 @@ import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
+import MongoStore from 'connect-mongo';
+import PgSession from 'connect-pg-simple';
 
 const app = express();
 const port = process.env.port || 3000;
@@ -16,6 +18,12 @@ dotenv.config()
 const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
+
+const PgSessionStore = PgSession(session);
+const sessionStore = new PgSessionStore({
+    pool,
+    tableName: 'sessions' // Optional: specify the table name for sessions
+});
 
 app.use(cors({
   origin: true,
@@ -48,9 +56,8 @@ const db = new Pool({
 
 db.connect();
 
-app.use(cookieParser());
-
 app.use(session({
+    store: sessionStore,
     secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
