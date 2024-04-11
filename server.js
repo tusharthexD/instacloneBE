@@ -87,10 +87,6 @@ app.get('/',(req,res)=>{
   res.send("created by Tushar")
 })
 
-app.get('*',(req,res)=>{
-  res.send("created by Tushar")
-})
-
 app.get("/api/", (req, res) => {
   if (req.session.user) {
     let { username, profile } = req.session.user;
@@ -598,6 +594,9 @@ app.get("/api/logout", (req, res) => {
   res.json({ isLoggedin: false });
 });
 
+app.get('*',(req,res)=>{
+  res.send("created by Tushar")
+})
 
 app.listen(port, () => {
   console.log(`Running on Port ${port}`);
