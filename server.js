@@ -4,7 +4,7 @@ import pg from "pg";
 import bcrypt from "bcrypt";
 import session from "express-session";
 import cors from "cors";
-import cookieParser from "cookie-parser";
+// import cookieParser from "cookie-parser";
 import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
@@ -18,11 +18,6 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-const PgSessionStore = PgSession(session);
-const sessionStore = new PgSessionStore({
-    pool,
-    tableName: 'sessions' // Optional: specify the table name for sessions
-});
 
 app.use(cors({
   origin: true,
@@ -54,6 +49,13 @@ const db = new Pool({
 });
 
 db.connect();
+
+const PgSessionStore = PgSession(session);
+const sessionStore = new PgSessionStore({
+    db,
+    tableName: 'sessions' // Optional: specify the table name for sessions
+});
+
 
 app.use(session({
     store: sessionStore,
