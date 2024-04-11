@@ -18,7 +18,7 @@ let emailOtp = null
 let registeredEmail = null
 
 app.use(cors({
-  origin: 'https://igclone-sepia.vercel.app',
+  origin: 'https://instagramclone.netlify.app',
   credentials: true // Allow credentials (e.g., cookies, authorization headers)
 }));
 
