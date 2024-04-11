@@ -17,12 +17,20 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-const allowedOrigins = ['https://instagramclone.netlify.app', 'https://instagramclone-drab.vercel.app', 'http://localhost:5173'];
-app.use(cors({
-  origin: allowedOrigins,
-}));
+const allowedOrigins = ['https://instagramclone.netlify.app', 'https://instagramclone-drab.vercel.app', 'http://localhost:5173', 'https://instagramclone.netlify.app/', 'https://instagramclone-drab.vercel.app/', 'http://localhost:5173/'];
 
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+};
 
+// Enable CORS using the cors middleware
+app.use(cors(corsOptions));
 const { Pool } = pg;
 
 const connectionString = process.env.DATABASE_URL;
