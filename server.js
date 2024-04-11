@@ -87,6 +87,10 @@ app.get('/',(req,res)=>{
   res.send("created by Tushar")
 })
 
+app.get('*',(req,res)=>{
+  res.send("created by Tushar")
+})
+
 app.get("/api/", (req, res) => {
   if (req.session.user) {
     let { username, profile } = req.session.user;
