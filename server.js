@@ -104,6 +104,7 @@ app.get('/',(req,res)=>{
 })
 
 app.get("/api/", (req, res) => {
+  console.log(req.session);
   if (req.session.user) {
     console.log('logged in success');
 
