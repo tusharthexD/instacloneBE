@@ -127,7 +127,7 @@ app.post("/api/profile", async (req, res) => {
                       
       res.send(data)
   } else {
-   res.json(null);
+   res.send(null);
   }
 
 
@@ -138,7 +138,7 @@ app.post("/api/profile/posts", async (req, res) => {
   const result = await db.query("SELECT * FROM instapost WHERE username = $1", [
     req.body.id,
   ]);
-  res.json(result.rows);
+  res.send(result.rows);
 });
 
 app.get('/api/profile/edit',async (req,res)=>{
@@ -148,9 +148,9 @@ app.get('/api/profile/edit',async (req,res)=>{
     [req.session.user.username]
   )
     result.rows[0].password = undefined
-    res.json(result.rows[0])
+    res.send(result.rows[0])
   } else {
-    res.json(null)
+    res.send(null)
   }
 })
 //update profile
@@ -164,14 +164,14 @@ app.post('/api/profile/edit',async (req,res)=>{
      await db.query(
      "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
      [fname, lname,bio,website, req.session.user.username])
-     res.json("Changes Saved")
+     res.send("Changes Saved")
 
    } catch (error) {
     console.log(error)
-    res.json(error)
+    res.send(error)
    }
   } else {
-    res.json('cahnges failed')
+    res.send('cahnges failed')
   }
 })
 
@@ -219,7 +219,7 @@ app.post("/api/search", async (req, res) => {
       "SELECT username,profile from users WHERE LOWER(username) LIKE '%' || $1 || '%'",
       [req.body.search]
     );
-    res.json(result.rows);
+    res.send(result.rows);
   } catch (error) {
     console.log(error);
   }
@@ -230,18 +230,18 @@ app.post("/api/search", async (req, res) => {
 app.get("/api/posts", async (req, res) => {
   try {
     const result = await db.query("SELECT * from instapost JOIN users ON instapost.username = users.username ");
-    res.json(result.rows);
+    res.send(result.rows);
   } catch (error) {
-    res.json(error)
+    res.send(error)
   }
 });
 
 app.get("/api/reels", async (req, res) => {
   try {
     const result = await db.query("SELECT * from instareels JOIN users ON instareels.username = users.username");
-    res.json(result.rows);
+    res.send(result.rows);
   } catch (error) {
-    res.json(error)
+    res.send(error)
   }
 });
 
@@ -294,16 +294,16 @@ try {
   result.rows[0].password = null
   result.rows[0].email = null
   
-  res.json(result.rows[0])
+  res.send(result.rows[0])
 } catch (error) {
-  res.json(error)
+  res.send(error)
 }
 
 })
 
 app.get('/api/stories',async (req,res)=>{
   const result = await db.query('SELECT instastory.username, id, story, profile FROM instastory JOIN users on instastory.username = users.username')
-  res.json(result.rows)
+  res.send(result.rows)
 
 })
 
@@ -362,10 +362,10 @@ try {
 } catch (error) {
   console.log(error);
 } 
-res.json(true)
+res.send(true)
 
  } else {
-  res.json(false)
+  res.send(false)
  }
 })
 //dislike
@@ -377,10 +377,10 @@ try {
 } catch (error) {
   console.log(error);
 } 
-res.json(false)
+res.send(false)
 
  } else {
-  res.json(false)
+  res.send(false)
  }
 })
 
@@ -416,10 +416,10 @@ app.get('/api/likeReel/:id',async(req,res)=>{
  } catch (error) {
    console.log(error);
  } 
- res.json(true)
+ res.send(true)
  
   } else {
-   res.json(false)
+   res.send(false)
   }
  })
  //dislike
@@ -431,10 +431,10 @@ app.get('/api/likeReel/:id',async(req,res)=>{
  } catch (error) {
    console.log(error);
  } 
- res.json(false)
+ res.send(false)
  
   } else {
-   res.json(false)
+   res.send(false)
   }
  })
  
@@ -475,9 +475,9 @@ app.post("/api/follow", async (req, res) => {
       "UPDATE userdata SET following = ARRAY_APPEND(following,$1) WHERE username = $2",
       [user, req.session.user.username]
     );
-    res.json("followed");
+    res.send("followed");
   } else {
-    res.json("req failed");
+    res.send("req failed");
   }
 });
 
@@ -492,9 +492,9 @@ app.post("/api/unfollow", async (req, res) => {
       "UPDATE userdata SET following = ARRAY_REMOVE(following,$1) WHERE username = $2",
       [user, req.session.user.username]
     );
-    res.json("unfollowed");
+    res.send("unfollowed");
   } else {
-    res.json("req failed");
+    res.send("req failed");
   }
 });
 
@@ -517,7 +517,7 @@ if (OTP == emailOtp) {
         if (mail.rows.length === 0) {
           bcrypt.hash(password, saltRound, async (err, hash) => {
             if (err) {
-              res.json("Technical Error");
+              res.send("Technical Error");
             } else {
               await db.query(
                 "INSERT INTO users(username,password,email) VALUES($1, $2, $3)",
@@ -529,18 +529,18 @@ if (OTP == emailOtp) {
               );
             }
           });
-          res.json("USER CREATED");
+          res.send("USER CREATED");
         } else {
-          res.json("Email already registered");
+          res.send("Email already registered");
         }
       } else {
-        res.json("USER ALREADY EXIST");
+        res.send("USER ALREADY EXIST");
       }
     } catch (error) {
-      res.json(error);
+      res.send(error);
     }
 } else {
-  res.json('Wrong OTP')
+  res.send('Wrong OTP')
 }
 });
 
@@ -567,15 +567,15 @@ app.post("/api/login", async (req, res) => {
       bcrypt.compare(password, loginPsw, (err, valid) => {
         if (valid) {
           req.session.user = result.rows[0];
-          res.json({
+          res.send({
             isLoggedin: true,
             message:
               "You're Logged in",
           });
         } else if (err) {
-          res.json({ isLoggedin: false, message: err });
+          res.send({ isLoggedin: false, message: err });
         } else {
-          res.json({
+          res.send({
             isLoggedin: false,
             message:
               "Sorry, your password was incorrect. Please double-check your password.",
@@ -583,10 +583,10 @@ app.post("/api/login", async (req, res) => {
         }
       });
     } else {
-      res.json({ isLoggedin: false, message: "User doesn't exist." });
+      res.send({ isLoggedin: false, message: "User doesn't exist." });
     }
   } catch (error) {
-    res.json({ isLoggedin: false, message: "User not exist" });
+    res.send({ isLoggedin: false, message: "User not exist" });
   }
 });
 
@@ -595,7 +595,7 @@ app.post("/api/login", async (req, res) => {
 // for logout
 app.get("/api/logout", (req, res) => {
   req.session.user = null;
-  res.json({ isLoggedin: false });
+  res.send({ isLoggedin: false });
 });
 
 
