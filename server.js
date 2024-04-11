@@ -17,8 +17,11 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-app.use(cors());
-
+app.use(cors({
+  origin: 'http://localhost:5173/', // Allow requests from this origin
+  methods: ['GET', 'POST'], // Allow specific HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+}));
 
 const { Pool } = pg;
 
@@ -553,6 +556,7 @@ app.post('/api/emailRegistration',(req,res)=>{
 
 // for login
 app.post("/api/login", async (req, res) => {
+  console.log('i am calling');
   const { username, password } = req.body;
   try {
     const result = await db.query("SELECT * FROM users WHERE username = $1", [
