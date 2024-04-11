@@ -584,6 +584,7 @@ app.post("/api/login", async (req, res) => {
         if (valid) {
           console.log(result.rows[0],'sucess');
           req.session.user = result.rows[0];
+          console.log(req.session.user,'aisaaaaaaaaaaaa hota bai');
           res.json({
             isLoggedin: true,
             message:
