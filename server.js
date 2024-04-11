@@ -18,9 +18,8 @@ let emailOtp = null
 let registeredEmail = null
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Allow requests from this origin
-  methods: ['GET', 'POST'], // Allow specific HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+  origin: 'http://localhost:5173',
+  credentials: true // Allow credentials (e.g., cookies, authorization headers)
 }));
 
 const { Pool } = pg;
