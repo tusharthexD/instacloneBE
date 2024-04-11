@@ -17,10 +17,13 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-app.use(cors({
-  origin: true,
+const corsOptions = {
+  origin: 'https://instagramclone-drab.vercel.app',
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Add other methods as needed
+};
+
+app.use(cors(corsOptions));
 
 const { Pool } = pg;
 
