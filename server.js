@@ -17,18 +17,10 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-// const corsOptions = {
-//   origin: ['https://instagramclone-drab.vercel.app', 'http://localhost:5173'],
-//   methods: ['GET', 'POST', 'DELETE', 'PUT'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   optionsSuccessStatus: 200 // Some legacy browsers choke on 204
-// };
-
-// // Use the CORS middleware with the specified options
-// app.use(cors(corsOptions));
-
-app.use(cors())
-
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 
 const { Pool } = pg;
 
