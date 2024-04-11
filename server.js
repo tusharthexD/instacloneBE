@@ -105,10 +105,13 @@ app.get('/',(req,res)=>{
 
 app.get("/api/", (req, res) => {
   if (req.session.user) {
+    console.log('logged in success');
+
     let { username, profile } = req.session.user;
-    res.json({ isLoggedin: true, user: username, profile: profile });
+    res.send({ isLoggedin: true, user: username, profile: profile });
   } else {
-    res.json({ isLoggedin: false });
+    console.log('failed log in');
+    res.send({ isLoggedin: false });
   }
 });
 
