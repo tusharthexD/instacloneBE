@@ -93,8 +93,7 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 
 
 
-app.get("/api/", (req, res) => {
-  console.log('/api/ calling');
+app.get("/api/islogged", (req, res) => {
   if (req.session.user) {
     let { username, profile } = req.session.user;
     res.send({ isLoggedin: true, user: username, profile: profile });
