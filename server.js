@@ -18,7 +18,7 @@ let emailOtp = null
 let registeredEmail = null
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://igclone-sepia.vercel.app',
   credentials: true // Allow credentials (e.g., cookies, authorization headers)
 }));
 
