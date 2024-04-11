@@ -9,7 +9,6 @@ import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
-import MongoStore from 'connect-mongo';
 import PgSession from 'connect-pg-simple';
 
 const app = express();
@@ -58,7 +57,7 @@ db.connect();
 
 app.use(session({
     store: sessionStore,
-    secret: 'your-secret-key',
+    secret: 'Tushar',
     resave: false,
     saveUninitialized: false,
     cookie: {
