@@ -17,21 +17,16 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-const corsOptions = {
-  origin: 'https://instagramclone-drab.vercel.app',
+app.use(cors({
+  origin: ['https://instagramclone-drab.vercel.app','http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Custom-Header'],
+  exposedHeaders: ['Content-Disposition'], // Example of exposing specific headers
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Add other methods as needed
-};
+}));
 
-app.use(cors(corsOptions));
-
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'https://instagramclone-drab.vercel.app');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    next();
-});
+// Handle OPTIONS requests for preflight
+app.options('*', cors());
 
 const { Pool } = pg;
 
