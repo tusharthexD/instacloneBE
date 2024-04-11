@@ -17,18 +17,23 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-const allowedOrigins = ['https://instagramclone-drab.vercel.app/', "https://instagramclone-drab.vercel.app"];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Check if the origin is in the allowedOrigins array or if it's undefined (e.g., when accessing from server-side)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true,
+  credentials: true
 }));
+
+// const allowedOrigins = ['https://instagramclone-drab.vercel.app/', "https://instagramclone-drab.vercel.app"];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // Check if the origin is in the allowedOrigins array or if it's undefined (e.g., when accessing from server-side)
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+// }));
 
 const { Pool } = pg;
 
