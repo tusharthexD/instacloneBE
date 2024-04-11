@@ -83,6 +83,9 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 });
 
 
+app.get('/',(req,res)=>{
+  res.send("created by Tushar")
+})
 
 app.get("/api/", (req, res) => {
   if (req.session.user) {
