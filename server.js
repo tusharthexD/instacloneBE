@@ -570,8 +570,7 @@ app.post("/api/login", async (req, res) => {
       bcrypt.compare(password, loginPsw, (err, valid) => {
         if (valid) {
           console.log(result.rows[0],'sucess');
-          req.session.user = result.rows[0];
-          console.log(req.session.user,'aisaaaaaaaaaaaa');
+          req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
           res.json({
             isLoggedin: true,
             message:
@@ -595,6 +594,8 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     res.json({ isLoggedin: false, message: "User not exist" });
   }
+  console.log(req.session.user,'aisaaaaaaaaaaaa');
+
 });
 
 
