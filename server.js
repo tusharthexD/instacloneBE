@@ -23,9 +23,9 @@ let registeredEmail = null
 // }));
 
 const corsOptions = {
-  origin: '*', // Allow requests from all origins
+  origin: true, // Allow requests from all origins
   methods: ['GET', 'POST'],
-  allowedHeaders: ['*'], // Allow all headers
+  allowedHeaders: true, // Allow all headers
 };
 
 app.use(cors(corsOptions));
