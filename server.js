@@ -25,6 +25,7 @@ let registeredEmail = null
 const corsOptions = {
   origin: true, // Allow requests from all origins
   methods: ['GET', 'POST'],
+  credentials: true,
   allowedHeaders: true, // Allow all headers
 };
 
