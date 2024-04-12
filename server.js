@@ -22,14 +22,6 @@ let registeredEmail = null
 //   credentials: true
 // }));
 
-const corsOptions = {
-  origin: true, // Allow requests from all origins
-  methods: ['GET', 'POST'],
-  credentials: true,
-  allowedHeaders: true, // Allow all headers
-};
-
-app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
@@ -39,6 +31,16 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } // Set secure to true if using HTTPS
 }));
+
+const corsOptions = {
+  origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  credentials: true, // Allow credentials (cookies, authentication headers)
+};
+
+// Enable CORS with the specified options
+app.use(cors(corsOptions));
 
 
 const { Pool } = pg;
