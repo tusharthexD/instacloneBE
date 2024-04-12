@@ -8,6 +8,7 @@ import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
+import MongoStore from "connect-mongo/build/main/index.js";
 
 const app = express();
 const port = process.env.port || 3000;
@@ -17,6 +18,15 @@ let emailOtp = null
 let registeredEmail = null
 
 // mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
+
+app.use(session({
+  secret: 'keyboard cat',
+  saveUninitialized: false, // don't create session until something stored
+  resave: false, //don't save session if unmodified
+  store: MongoStore.create({ mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0' })
+}));
+
+
 
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
@@ -85,14 +95,11 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 
 
 app.get('/',(req,res)=>{
-  console.log('on normal call', req.session);
   res.send("created by Tushar")
 })
 
 app.get("/api/", (req, res) => {
   console.log(req.session);
-
-
 
   if (req.session.user) {
     console.log('logged in success');
