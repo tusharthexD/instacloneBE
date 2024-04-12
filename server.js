@@ -123,6 +123,7 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 
 
 app.get('/',(req,res)=>{
+  console.log('on normal call', req.session);
   res.send("created by Tushar")
 })
 
@@ -604,7 +605,7 @@ app.post("/api/login", async (req, res) => {
     if (result.rows.length > 0) {
       bcrypt.compare(password, loginPsw, async (err, valid) => {
         if (valid) {
-          console.log(result.rows[0],'sucess');
+
           req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
     try {
         await req.session.save();
@@ -612,6 +613,7 @@ app.post("/api/login", async (req, res) => {
         console.error('Error saving to session storage: ', err);
         return next(new Error('Error creating user'));
     }
+    console.log(req.session ,'sucess');
           res.json({
             isLoggedin: true,
             message:
