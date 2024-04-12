@@ -9,6 +9,7 @@ import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
+import MongoStore from "connect-mongo";
 
 const app = express();
 const port = process.env.port || 3000;
@@ -23,13 +24,27 @@ let registeredEmail = null
 // }));
 
 
-app.use(cookieParser());
+// app.use(cookieParser());
 
+// app.use(session({
+//   secret: 'your-secret-key', // Replace with your secret key for session encryption
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: false } // Set secure to true if using HTTPS
+// }));
+// 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 app.use(session({
-  secret: 'your-secret-key', // Replace with your secret key for session encryption
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set secure to true if using HTTPS
+    name: 'example.sid',
+    secret: 'tusharspamz',
+    httpOnly: true,
+    secure: true,
+    maxAge: 1000 * 60 * 60 * 7,
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/'
+    })
+
 }));
 
 const corsOptions = {
