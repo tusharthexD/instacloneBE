@@ -18,28 +18,42 @@ let emailOtp = null
 let registeredEmail = null
 
 
-const store = new (MongoDBStore(session))({
-  uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
-  collection: 'sessions',
-});
+// const store = new (MongoDBStore(session))({
+//   uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
+//   collection: 'sessions',
+// });
 
-store.on('error', error => {
-  console.log('Session store error:', error);
-});
+// store.on('error', error => {
+//   console.log('Session store error:', error);
+// });
 
-app.use(
-  session({
-    secret: 'mySecret', // Change this to a long, random string
-    resave: false,
-    saveUninitialized: false,
-    store,
-    cookie: {
-      sameSite: 'none',
-			secure: true,
-      maxAge: 1000 * 60 * 60 * 24, // 1 day in milliseconds
-    },
-  })
-);
+// app.use(
+//   session({
+//     secret: 'mySecret', // Change this to a long, random string
+//     resave: false,
+//     saveUninitialized: false,
+//     store,
+//     cookie: {
+//       sameSite: 'none',
+// 			secure: true,
+//       maxAge: 1000 * 60 * 60 * 24, // 1 day in milliseconds
+//     },
+//   })
+// );
+
+app.use(session({
+  name:"projectName.sid",
+  store:store,
+  resave: true,
+  saveUninitialized: false,
+  secret: 'tusharrrr',
+  cookie: {
+    maxAge: expiredDate,
+    secure:true,
+    httpOnly:true,
+    sameSite:"none"
+  }
+}))
 
 
 const corsOptions = {
