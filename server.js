@@ -53,18 +53,18 @@ store.on('disconnected', () => {
 // );
 
 app.use(session({
-  name:"projectName.sid",
-  store:store,
+  name: "projectName.sid",
+  store: store,
   resave: true,
   saveUninitialized: false,
   secret: 'tusharrrr',
   cookie: {
-    maxAge: 86400,
-    secure:false,
-    httpOnly:true,
-    sameSite:"none"
+    maxAge: 86400 * 1000, // 1 day in milliseconds
+    secure: true, // Set to true if using HTTPS
+    httpOnly: true,
+    sameSite: 'none' // Suitable for HTTPS with cross-site requests
   }
-}))
+}));
 
 
 const corsOptions = {
