@@ -22,18 +22,6 @@ app.use(cors({
   credentials: true
 }));
 
-// const allowedOrigins = ['https://instagramclone-drab.vercel.app/', "https://instagramclone-drab.vercel.app"];
-
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     // Check if the origin is in the allowedOrigins array or if it's undefined (e.g., when accessing from server-side)
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-// }));
 
 const { Pool } = pg;
 
@@ -52,10 +40,10 @@ app.use(cookieParser());
 
 app.use(
   session({
-    secret: 'your_session_secret',
+    secret: 'TusharSpamz',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true, sameSite: 'none' }, // Adjust according to your security requirements
+    cookie: { secure: true, sameSite: 'none', maxAge: 84600000 }, // Adjust according to your security requirements
   })
 );
 
