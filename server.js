@@ -4,12 +4,11 @@ import pg from "pg";
 import bcrypt from "bcrypt";
 import session from "express-session";
 import cors from "cors";
-// import cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser";
 import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
-import PgSession from 'connect-pg-simple';
 
 const app = express();
 const port = process.env.port || 3000;
@@ -17,7 +16,6 @@ dotenv.config()
 const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
-
 
 app.use(cors({
   origin: true,
@@ -50,16 +48,10 @@ const db = new Pool({
 
 db.connect();
 
-const PgSessionStore = PgSession(session);
-const sessionStore = new PgSessionStore({
-    db,
-    tableName: 'sessions' // Optional: specify the table name for sessions
-});
-
+app.use(cookieParser());
 
 app.use(session({
-    store: sessionStore,
-    secret: 'Tushar',
+    secret: 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -592,7 +584,7 @@ app.post("/api/login", async (req, res) => {
         if (valid) {
           console.log(result.rows[0],'sucess');
           req.session.user = result.rows[0];
-          console.log(req.session.user,'aisaaaaaaaaaaaa hota bai');
+          console.log(req.session.user,'aisaaaaaaaaaaaa');
           res.json({
             isLoggedin: true,
             message:
