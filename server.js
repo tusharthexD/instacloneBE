@@ -8,7 +8,6 @@ import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
-import MongoDBStore from "connect-mongodb-session";
 
 const app = express();
 const port = process.env.port || 3000;
@@ -17,55 +16,7 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-
-const store = new (MongoDBStore(session))({
-  uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
-  collection: 'sessions',
-});
-
-store.on('error', error => {
-  console.log('Session store error:', error);
-});
-
-// Check if store is connected
-store.on('connected', () => {
-  console.log('Session store connected to MongoDB');
-});
-
-// Check if store is disconnected
-store.on('disconnected', () => {
-  console.log('Session store disconnected from MongoDB');
-});
-
-
-// app.use(
-//   session({
-//     secret: 'mySecret', // Change this to a long, random string
-//     resave: false,
-//     saveUninitialized: false,
-//     store,
-//     cookie: {
-//       sameSite: 'none',
-// 			secure: true,
-//       maxAge: 1000 * 60 * 60 * 24, // 1 day in milliseconds
-//     },
-//   })
-// );
-
-app.use(session({
-  name: "projectName.sid",
-  store: store,
-  resave: true,
-  saveUninitialized: false,
-  secret: 'tusharrrr',
-  cookie: {
-    maxAge: 86400 * 1000, // 1 day in milliseconds
-    secure: true, // Set to true if using HTTPS
-    httpOnly: true,
-    sameSite: 'none' // Suitable for HTTPS with cross-site requests
-  }
-}));
-
+// mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
 
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
