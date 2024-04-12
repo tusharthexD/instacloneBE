@@ -24,14 +24,14 @@ let registeredEmail = null
 // }));
 
 
-// app.use(cookieParser());
+app.use(cookieParser());
 
-// app.use(session({
-//   secret: 'your-secret-key', // Replace with your secret key for session encryption
-//   resave: false,
-//   saveUninitialized: true,
-//   cookie: { secure: false } // Set secure to true if using HTTPS
-// }));
+app.use(session({
+  secret: 'your-secret-key', // Replace with your secret key for session encryption
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set secure to true if using HTTPS
+}));
 // 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 // app.use(session({
 //     name: 'example.sid',
@@ -47,15 +47,15 @@ let registeredEmail = null
 
 // }));
 
-app.use(session({
-    secret: 'your_secret_key',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ 
-        mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/', 
-        ttl: 7 * 24 * 60 * 60 // Session TTL in seconds (optional)
-    })
-}));
+// app.use(session({
+//     secret: 'your_secret_key',
+//     resave: false,
+//     saveUninitialized: false,
+//     store: MongoStore.create({ 
+//         mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/', 
+//         ttl: 7 * 24 * 60 * 60 // Session TTL in seconds (optional)
+//     })
+// }));
 
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
