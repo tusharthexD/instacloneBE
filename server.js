@@ -117,14 +117,6 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
  }
 });
 
-const authorize = (req, res, next) => {
-  if (!req.session.user) {
-    return res.status(401).send('Unauthorized');
-  }
-
-  // User is authenticated, proceed to the next middleware or route handler
-  next();
-};
 
 
 app.get('/',(req,res)=>{
@@ -132,7 +124,7 @@ app.get('/',(req,res)=>{
   res.send("created by Tushar")
 })
 
-app.get("/api/", authorize, (req, res) => {
+app.get("/api/", (req, res) => {
   console.log(req.session);
 
     let { username, profile } = req.session.user;
