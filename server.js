@@ -48,7 +48,7 @@ app.use(session({
   saveUninitialized: false,
   secret: 'tusharrrr',
   cookie: {
-    maxAge: expiredDate,
+    maxAge: 86400,
     secure:true,
     httpOnly:true,
     sameSite:"none"
