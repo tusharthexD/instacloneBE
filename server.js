@@ -19,7 +19,7 @@ let registeredEmail = null
 
 
 const store = new (MongoDBStore(session))({
-  uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/sessions?retryWrites=true&w=majority&appName=Cluster0',
+  uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
   collection: 'sessions',
 });
 
