@@ -18,14 +18,25 @@ let emailOtp = null
 let registeredEmail = null
 
 
-// const store = new (MongoDBStore(session))({
-//   uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
-//   collection: 'sessions',
-// });
+const store = new (MongoDBStore(session))({
+  uri: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
+  collection: 'sessions',
+});
 
-// store.on('error', error => {
-//   console.log('Session store error:', error);
-// });
+store.on('error', error => {
+  console.log('Session store error:', error);
+});
+
+// Check if store is connected
+store.on('connected', () => {
+  console.log('Session store connected to MongoDB');
+});
+
+// Check if store is disconnected
+store.on('disconnected', () => {
+  console.log('Session store disconnected from MongoDB');
+});
+
 
 // app.use(
 //   session({
@@ -49,7 +60,7 @@ app.use(session({
   secret: 'tusharrrr',
   cookie: {
     maxAge: 86400,
-    secure:true,
+    secure:false,
     httpOnly:true,
     sameSite:"none"
   }
