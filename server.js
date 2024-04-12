@@ -100,7 +100,7 @@ app.get('/',(req,res)=>{
 })
 
 app.get("/api/", (req, res) => {
-  console.log(req.session);
+  console.log(req.cookies,'ye dekhoooooo');
 
   if (req.session.user) {
     console.log('logged in success');
