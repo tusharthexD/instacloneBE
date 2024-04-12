@@ -52,10 +52,10 @@ app.use(cookieParser());
 
 app.use(
   session({
-    secret: 'Tusharspamz',
+    secret: 'your_session_secret',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false, maxAge: 86400000 }, // Set a longer expiry (e.g., 1 day)
+    cookie: { secure: true, sameSite: 'none' }, // Adjust according to your security requirements
   })
 );
 
