@@ -50,15 +50,14 @@ db.connect();
 
 app.use(cookieParser());
 
-app.use(session({
-    secret: 'your-secret-key',
+app.use(
+  session({
+    secret: 'Tusharspamz',
     resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 // 1 day in milliseconds
-    }
-}));
-
+    saveUninitialized: true,
+    cookie: { secure: false, maxAge: 86400000 }, // Set a longer expiry (e.g., 1 day)
+  })
+);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
