@@ -592,10 +592,16 @@ app.post("/api/login", async (req, res) => {
     let loginPsw = result.rows[0].password;
 
     if (result.rows.length > 0) {
-      bcrypt.compare(password, loginPsw, (err, valid) => {
+      bcrypt.compare(password, loginPsw, async (err, valid) => {
         if (valid) {
           console.log(result.rows[0],'sucess');
           req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
+    try {
+        await req.session.save();
+    } catch (err) {
+        console.error('Error saving to session storage: ', err);
+        return next(new Error('Error creating user'));
+    }
           res.json({
             isLoggedin: true,
             message:
@@ -626,8 +632,13 @@ app.post("/api/login", async (req, res) => {
 
 
 // for logout
-app.get("/api/logout", (req, res) => {
-  req.session.user = null;
+app.get("/api/logout", async (req, res) => {
+  try {
+        await req.session.destroy();
+    } catch (err) {
+        console.error('Error logging out:', err);
+        return next(new Error('Error logging out'));
+    }
   res.json({ isLoggedin: false });
 });
 
