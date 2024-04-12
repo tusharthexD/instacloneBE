@@ -17,21 +17,28 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+// app.use(cors({
+//   origin: true,
+//   credentials: true
+// }));
 
+const corsOptions = {
+  origin: '*', // Allow requests from all origins
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['*'], // Allow all headers
+};
+
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
-app.use(
-  session({
-    secret: 'TusharSpamz',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true, sameSite: 'none' },
-  })
-);
+
+app.use(session({
+  secret: 'your-secret-key', // Replace with your secret key for session encryption
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set secure to true if using HTTPS
+}));
+
 
 const { Pool } = pg;
 
