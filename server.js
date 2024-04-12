@@ -20,12 +20,13 @@ let registeredEmail = null
 // mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
 
 app.use(session({
-  secret: 'keyboard cat',
-  saveUninitialized: false, // don't create session until something stored
-  resave: false, //don't save session if unmodified
-  store: MongoStore.create({ mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0' })
+  secret: 'tushar',
+  store: MongoStore.create({
+    mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
+    autoRemove: 'interval',
+    autoRemoveInterval: 10 // In minutes. Default
+  })
 }));
-
 
 
 const corsOptions = {
@@ -604,7 +605,6 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     res.json({ isLoggedin: false, message: "User not exist" });
   }
-  console.log(req.session.user,'aisaaaaaaaaaaaa');
 
 });
 
