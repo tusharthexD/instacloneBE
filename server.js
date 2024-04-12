@@ -33,18 +33,28 @@ let registeredEmail = null
 //   cookie: { secure: false } // Set secure to true if using HTTPS
 // }));
 // 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-app.use(session({
-    name: 'example.sid',
-    secret: 'tusharspamz',
-    httpOnly: true,
-    secure: true,
-    maxAge: 1000 * 60 * 60 * 7,
-    resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({
-        mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/'
-    })
+// app.use(session({
+//     name: 'example.sid',
+//     secret: 'tusharspamz',
+//     httpOnly: true,
+//     secure: true,
+//     maxAge: 1000 * 60 * 60 * 7,
+//     resave: false,
+//     saveUninitialized: true,
+//     store: MongoStore.create({
+//         mongoUrl: ''
+//     })
 
+// }));
+
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ 
+        mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/', 
+        ttl: 7 * 24 * 60 * 60 // Session TTL in seconds (optional)
+    })
 }));
 
 const corsOptions = {
