@@ -609,12 +609,7 @@ app.post("/api/login", async (req, res) => {
         if (valid) {
 
           req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
-    try {
-        await req.session.save();
-    } catch (err) {
-        console.error('Error saving to session storage: ', err);
-        return next(new Error('Error creating user'));
-    }
+   
     console.log(req.session ,'sucess');
           res.json({
             isLoggedin: true,
