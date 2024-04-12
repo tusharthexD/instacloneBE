@@ -23,6 +23,16 @@ app.use(cors({
 }));
 
 
+app.use(cookieParser());
+app.use(
+  session({
+    secret: 'TusharSpamz',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true, sameSite: 'none' },
+  })
+);
+
 const { Pool } = pg;
 
 const connectionString = process.env.DATABASE_URL;
@@ -36,16 +46,6 @@ const db = new Pool({
 
 db.connect();
 
-app.use(cookieParser());
-
-app.use(
-  session({
-    secret: 'TusharSpamz',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true, sameSite: 'none', maxAge: 84600000 }, // Adjust according to your security requirements
-  })
-);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
