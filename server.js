@@ -100,7 +100,7 @@ app.get('/',(req,res)=>{
 })
 
 app.get("/api/", (req, res) => {
-  console.log(req.cookies,'ye dekhoooooo');
+  console.log(req,'ye dekhoooooo');
 
   if (req.session.user) {
     console.log('logged in success');
@@ -611,15 +611,15 @@ app.post("/api/login", async (req, res) => {
 
 
 // for logout
-app.get("/api/logout", async (req, res) => {
-  try {
-        await req.session.destroy();
-    } catch (err) {
-        console.error('Error logging out:', err);
-        return next(new Error('Error logging out'));
-    }
-  res.json({ isLoggedin: false });
-});
+// app.get("/api/logout", async (req, res) => {
+//   try {
+//         await req.session.destroy();
+//     } catch (err) {
+//         console.error('Error logging out:', err);
+//         return next(new Error('Error logging out'));
+//     }
+//   res.json({ isLoggedin: false });
+// });
 
 app.get('*',(req,res)=>{
   res.send("created by Tushar")
