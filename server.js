@@ -2,13 +2,14 @@ import express from "express";
 import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
-import session from "express-session";
 import cors from "cors";
 import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
-import MongoStore from "connect-mongo/build/main/index.js";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+
 
 const app = express();
 const port = process.env.port || 3000;
@@ -18,14 +19,13 @@ let emailOtp = null
 let registeredEmail = null
 
 // mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
+app.use(cookieParser());
 
 app.use(session({
-  secret: 'tushar',
-  store: MongoStore.create({
-    mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
-    autoRemove: 'interval',
-    autoRemoveInterval: 10 // In minutes. Default
-  })
+  secret: 'Tusharrr',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true } // Enable this if using HTTPS
 }));
 
 
