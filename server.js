@@ -4,12 +4,12 @@ import pg from "pg";
 import bcrypt from "bcrypt";
 import session from "express-session";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
-import MongoStore from "connect-mongo";
+import MongoStore from 'connect-mongo';
+
 
 const app = express();
 const port = process.env.port || 3000;
@@ -18,20 +18,16 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-// app.use(cors({
-//   origin: true,
-//   credentials: true
-// }));
-
-
-app.use(cookieParser());
-
 app.use(session({
-  secret: 'your-secret-key', // Replace with your secret key for session encryption
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set secure to true if using HTTPS
+  secret: 'keyboard cat',
+  saveUninitialized: false, // don't create session until something stored
+  resave: false, //don't save session if unmodified
+  store: MongoStore.create({
+    mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/',
+    touchAfter: 86599999 // time period in seconds
+  })
 }));
+
 // 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 // app.use(session({
 //     name: 'example.sid',
@@ -121,23 +117,37 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
  }
 });
 
+const authorize = (req, res, next) => {
+  if (!req.session.user) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  // User is authenticated, proceed to the next middleware or route handler
+  next();
+};
+
 
 app.get('/',(req,res)=>{
   console.log('on normal call', req.session);
   res.send("created by Tushar")
 })
 
-app.get("/api/", (req, res) => {
+app.get("/api/", authorize, (req, res) => {
   console.log(req.session);
-  if (req.session.user) {
-    console.log('logged in success');
 
     let { username, profile } = req.session.user;
-    res.send({ isLoggedin: true, user: username, profile: profile });
-  } else {
-    console.log('failed log in');
-    res.send({ isLoggedin: false });
-  }
+    res.send({ isLoggedin: true, user: username, profile: profile })
+
+
+  // if (req.session.user) {
+  //   console.log('logged in success');
+
+  //   let { username, profile } = req.session.user;
+  //   res.send({ isLoggedin: true, user: username, profile: profile });
+  // } else {
+  //   console.log('failed log in');
+  //   res.send({ isLoggedin: false });
+  // }
 });
 
 
