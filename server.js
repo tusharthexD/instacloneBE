@@ -95,12 +95,54 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 
 
 
+// for login
+app.post("/api/login", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const result = await db.query("SELECT * FROM users WHERE username = $1", [
+      username.toLowerCase(),
+    ]);
+    let loginPsw = result.rows[0].password;
+
+    if (result.rows.length > 0) {
+      bcrypt.compare(password, loginPsw, async (err, valid) => {
+        if (valid) {
+
+          req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
+   
+    console.log(req.session ,'sucess');
+          res.json({
+            isLoggedin: true,
+            message:
+              "You're Logged in",
+          });
+        } else if (err) {
+          console.log('not sucess');
+          res.json({ isLoggedin: false, message: err });
+        } else {
+          console.log('failed');
+          res.json({
+            isLoggedin: false,
+            message:
+              "Sorry, your password was incorrect. Please double-check your password.",
+          });
+        }
+      });
+    } else {
+      res.json({ isLoggedin: false, message: "User doesn't exist." });
+    }
+  } catch (error) {
+    res.json({ isLoggedin: false, message: "User not exist" });
+  }
+
+});
+
 app.get('/',(req,res)=>{
   res.send("created by Tushar")
 })
 
 app.get("/api/", (req, res) => {
-  console.log(req,'ye dekhoooooo');
+  console.log(req.session,'ye dekhoooooo');
 
   if (req.session.user) {
     console.log('logged in success');
@@ -566,60 +608,17 @@ app.post('/api/emailRegistration',(req,res)=>{
 })
 
 
-// for login
-app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const result = await db.query("SELECT * FROM users WHERE username = $1", [
-      username.toLowerCase(),
-    ]);
-    let loginPsw = result.rows[0].password;
-
-    if (result.rows.length > 0) {
-      bcrypt.compare(password, loginPsw, async (err, valid) => {
-        if (valid) {
-
-          req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
-   
-    console.log(req.session ,'sucess');
-          res.json({
-            isLoggedin: true,
-            message:
-              "You're Logged in",
-          });
-        } else if (err) {
-          console.log('not sucess');
-          res.json({ isLoggedin: false, message: err });
-        } else {
-          console.log('failed');
-          res.json({
-            isLoggedin: false,
-            message:
-              "Sorry, your password was incorrect. Please double-check your password.",
-          });
-        }
-      });
-    } else {
-      res.json({ isLoggedin: false, message: "User doesn't exist." });
-    }
-  } catch (error) {
-    res.json({ isLoggedin: false, message: "User not exist" });
-  }
-
-});
-
-
 
 // for logout
-// app.get("/api/logout", async (req, res) => {
-//   try {
-//         await req.session.destroy();
-//     } catch (err) {
-//         console.error('Error logging out:', err);
-//         return next(new Error('Error logging out'));
-//     }
-//   res.json({ isLoggedin: false });
-// });
+app.get("/api/logout", async (req, res) => {
+  try {
+        await req.session.destroy();
+    } catch (err) {
+        console.error('Error logging out:', err);
+        return next(new Error('Error logging out'));
+    }
+  res.json({ isLoggedin: false });
+});
 
 app.get('*',(req,res)=>{
   res.send("created by Tushar")
