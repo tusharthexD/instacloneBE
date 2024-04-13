@@ -26,7 +26,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   withCredentials: true,
-  cookie: { secure: false, maxAge: 6000000 },
+  cookie: { secure: true, maxAge: 6000000, sameSite : "none" },
   store: MongoStore.create({
     mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
   })  
@@ -40,7 +40,7 @@ app.use(session({
 
 // Enable CORS with the specified options
 app.use(cors({
-  origin: 'https://instagramclone-drab.vercel.app',
+  origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'],
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 }));
 
