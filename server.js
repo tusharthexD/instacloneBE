@@ -26,7 +26,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   withCredentials: true,
-  cookie: { secure: true },
+  cookie: { secure: false, maxAge: 6000000 },
   store: MongoStore.create({
     mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
   })  
