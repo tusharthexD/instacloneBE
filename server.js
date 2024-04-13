@@ -8,6 +8,7 @@ import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
 import session from "express-session";
+import MongoStore from "connect-mongo";
 
 const app = express();
 const port = process.env.port || 3000;
@@ -19,14 +20,17 @@ let registeredEmail = null
 // mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
 // app.use(cookieParser());
 
-app.set('trust proxy', 1) // trust first proxy
-
 app.use(session({
-  secret: 'my-secret',  // a secret string used to sign the session ID cookie
-  resave: false,  // don't save session if unmodified
-  saveUninitialized: false  // don't create session until something stored
-}))
-
+  secret: 'secret',
+  proxy: true,
+  resave: false,
+  saveUninitialized: true,
+  withCredentials: true,
+  cookie: { secure: true },
+  store: MongoStore.create({
+    mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
+  })  
+}));
 // const corsOptions = {
 //   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
 //   methods: ['GET', 'POST'],
