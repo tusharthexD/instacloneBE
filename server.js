@@ -3,32 +3,29 @@ import bodyParser from "body-parser";
 import pg from "pg";
 import bcrypt from "bcrypt";
 import cors from "cors";
-import { SendMail } from "./SendMail.js";
-import multer from "multer";
+import {SendMail} from './SendMail.js'
+import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
-import dotenv from "dotenv";
+import dotenv from 'dotenv'
 import session from "express-session";
-import cookieParser from "cookie-parser";
 
 const app = express();
 const port = process.env.port || 3000;
-dotenv.config();
+dotenv.config()
 const saltRound = 4;
-let emailOtp = null;
-let registeredEmail = null;
+let emailOtp = null
+let registeredEmail = null
 
 // mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
-app.use(cookieParser());
+// app.use(cookieParser());
 
-app.set("trust proxy", 1); // trust first proxy
-app.use(
-  session({
-    secret: "keyboard cat",
-    resave: true,
-    saveUninitialized: true,
-    cookie: { secure: true },
-  })
-);
+app.set('trust proxy', 1) // trust first proxy
+
+app.use(session({
+  secret: 'my-secret',  // a secret string used to sign the session ID cookie
+  resave: false,  // don't save session if unmodified
+  saveUninitialized: false  // don't create session until something stored
+}))
 
 // const corsOptions = {
 //   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
@@ -38,12 +35,10 @@ app.use(
 // };
 
 // Enable CORS with the specified options
-app.use(
-  cors({
-    origin: "https://instagramclone-drab.vercel.app",
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-  })
-);
+app.use(cors({
+  origin: 'https://instagramclone-drab.vercel.app',
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+}));
 
 const { Pool } = pg;
 
@@ -58,6 +53,7 @@ const db = new Pool({
 
 db.connect();
 
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -67,33 +63,37 @@ const hour = minute * 60;
 let hours = Math.round(Date.now() / hour);
 
 // Multer configuration for file upload
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: 'uploads/' });
 
 // Endpoint for video trimming
-// app.post("/api/trim", upload.single("video"), (req, res) => {
-//   try {
-//     const { start, end } = req.body;
-//     const inputFile = req.file.path;
-//     const outputFile = `uploads/trimmed_${req.file.originalname}`;
-//     // Trim video
-//     ffmpeg(inputFile)
-//       .setStartTime(start)
-//       .setDuration(end - start)
-//       .size("?x600")
-//       .format("mp4")
-//       .output(outputFile)
-//       .on("end", async () => {
-//         res.sendFile(outputFile, { root: "." });
-//       })
-//       .on("error", (err) => {
-//         console.error("Error trimming video:", err);
-//         res.status(500).json({ error: "Error trimming video" });
-//       })
-//       .run();
-//   } catch (error) {
-//     res.json(error);
-//   }
-// });
+app.post('/api/trim', upload.single('video'),(req, res) => {
+
+ try {
+     const { start, end } = req.body;
+     const inputFile = req.file.path;
+     const outputFile = `uploads/trimmed_${req.file.originalname}`;
+     // Trim video
+      ffmpeg(inputFile)
+ 
+         .setStartTime(start)
+         .setDuration(end - start)
+         .size('?x600')
+         .format('mp4')
+         .output(outputFile)
+         .on('end',async () => {
+           res.sendFile(outputFile, { root: '.' })
+         })
+         .on('error', (err) => {
+             console.error('Error trimming video:', err);
+             res.status(500).json({ error: 'Error trimming video' });
+         })
+         .run()
+ } catch (error) {
+  res.json(error)
+ }
+});
+
+
 
 // for login
 app.post("/api/login", async (req, res) => {
@@ -107,28 +107,20 @@ app.post("/api/login", async (req, res) => {
     if (result.rows.length > 0) {
       bcrypt.compare(password, loginPsw, async (err, valid) => {
         if (valid) {
-          req.session.user = {
-            username: result.rows[0].username,
-            profile: result.rows[0].profile,
-          };
-          req.session.save((err) => {
-            if (err) {
-              console.error("Error saving session:", err);
-              res.status(500).send("Error saving session");
-            } else {
-              res.json({
-                isLoggedin: true,
-                message: "You're Logged in",
-              });
-            }
+
+          req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
+   
+    console.log(req.session ,'sucess');
+          res.json({
+            isLoggedin: true,
+            message:
+              "You're Logged in",
           });
-          console.log(req.session, "sucess");
-          
         } else if (err) {
-          console.log("not sucess");
+          console.log('not sucess');
           res.json({ isLoggedin: false, message: err });
         } else {
-          console.log("failed");
+          console.log('failed');
           res.json({
             isLoggedin: false,
             message:
@@ -142,501 +134,501 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     res.json({ isLoggedin: false, message: "User not exist" });
   }
+
 });
 
-app.get("/", (req, res) => {
-  res.send("created by Tushar");
-});
+app.get('/',(req,res)=>{
+  res.send("created by Tushar")
+})
 
 app.get("/api/", (req, res) => {
-  console.log(req.session, "ye dekhoooooo");
+  console.log(req.session,'ye dekhoooooo');
 
   if (req.session.user) {
-    console.log("logged in success");
+    console.log('logged in success');
 
     let { username, profile } = req.session.user;
     res.send({ isLoggedin: true, user: username, profile: profile });
   } else {
-    console.log("failed log in");
+    console.log('failed log in');
     res.send({ isLoggedin: false });
   }
 });
 
-// app.post("/api/profile", async (req, res) => {
-//   const result = await db.query(
-//     "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
-//     [req.body.id]
-//   );
 
-//   let data = {
-//     user: result.rows[0],
-//     isFollowed: false,
-//     isLoggedin: false,
-//     myProfile: false,
-//   };
-//   if (result.rows.length > 0) {
-//     if (req.session.user) {
-//       data.isLoggedin = true;
-//       if (req.session.user.username == data.user.username)
-//         data.myProfile = true;
-//       if (data.user.followers) {
-//         let ress = data.user.followers.find(
-//           (e) => e == req.session.user.username
-//         );
-//         if (ress) data.isFollowed = true;
-//       }
-//     }
+app.post("/api/profile", async (req, res) => {
+  const result = await db.query(
+    "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
+    [req.body.id]
+  );
 
-//     res.json(data);
-//   } else {
-//     res.json(null);
-//   }
-// });
+  let data = {
+    user: result.rows[0],
+    isFollowed: false,
+    isLoggedin: false,
+    myProfile: false,
+  };
+  if (result.rows.length > 0) {
+       if (req.session.user) {
+               data.isLoggedin = true;
+                if (req.session.user.username == data.user.username) data.myProfile = true;
+                  if (data.user.followers) {
+                     let ress = data.user.followers.find(
+                     (e) => e == req.session.user.username);
+                     if(ress) data.isFollowed = true
+                    }}
+                      
+      res.json(data)
+  } else {
+   res.json(null);
+  }
 
-// //profile post
-// app.post("/api/profile/posts", async (req, res) => {
-//   const result = await db.query("SELECT * FROM instapost WHERE username = $1", [
-//     req.body.id,
-//   ]);
-//   res.json(result.rows);
-// });
 
-// app.get("/api/profile/edit", async (req, res) => {
-//   if (req.session.user) {
-//     const result = await db.query(
-//       "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
-//       [req.session.user.username]
-//     );
-//     result.rows[0].password = undefined;
-//     res.json(result.rows[0]);
-//   } else {
-//     res.json(null);
-//   }
-// });
-// //update profile
-// app.post("/api/profile/edit", async (req, res) => {
-//   let { profile, fname, lname, bio, website } = req.body;
-//   if (req.session.user) {
-//     try {
-//       await db.query("UPDATE users SET profile = $1 WHERE username = $2", [
-//         profile,
-//         req.session.user.username,
-//       ]);
-//       await db.query(
-//         "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
-//         [fname, lname, bio, website, req.session.user.username]
-//       );
-//       res.json("Changes Saved");
-//     } catch (error) {
-//       console.log(error);
-//       res.json(error);
-//     }
-//   } else {
-//     res.json("cahnges failed");
-//   }
-// });
+});
 
-// // for addpost
-// app.post("/api/addpost", async (req, res) => {
-//   let { id, username, post, caption } = req.body;
-//   let t = new Date();
-//   let time = t.getTime();
-//   try {
-//     await db.query(
-//       "INSERT INTO instapost(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
-//       [id, req.session.user.username, post, [], caption, [], time]
-//     );
-//     res.json("success");
-//   } catch (error) {
-//     console.log(error);
-//     res.json(error);
-//   }
-// });
+//profile post
+app.post("/api/profile/posts", async (req, res) => {
+  const result = await db.query("SELECT * FROM instapost WHERE username = $1", [
+    req.body.id,
+  ]);
+  res.json(result.rows);
+});
 
-// // for add reel
-// app.post("/api/addreel", async (req, res) => {
-//   let { id, post, caption } = req.body;
-//   let t = new Date();
-//   let time = t.getTime();
-//   try {
-//     await db.query(
-//       "INSERT INTO instareels(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
-//       [id, req.session.user.username, post, [], caption, [], time]
-//     );
-//     res.json("success");
-//   } catch (error) {
-//     console.log(error);
-//     res.json(error);
-//   }
-// });
+app.get('/api/profile/edit',async (req,res)=>{
+  if (req.session.user) {
+    const result = await db.query(
+    "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
+    [req.session.user.username]
+  )
+    result.rows[0].password = undefined
+    res.json(result.rows[0])
+  } else {
+    res.json(null)
+  }
+})
+//update profile
+app.post('/api/profile/edit',async (req,res)=>{
+  let {profile,fname,lname,bio,website} = req.body
+  if (req.session.user) {
+   try {
+     await db.query(
+     "UPDATE users SET profile = $1 WHERE username = $2",
+     [profile, req.session.user.username])
+     await db.query(
+     "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
+     [fname, lname,bio,website, req.session.user.username])
+     res.json("Changes Saved")
 
-// //Search user
-// app.post("/api/search", async (req, res) => {
-//   try {
-//     let result = await db.query(
-//       "SELECT username,profile from users WHERE LOWER(username) LIKE '%' || $1 || '%'",
-//       [req.body.search]
-//     );
-//     res.json(result.rows);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+   } catch (error) {
+    console.log(error)
+    res.json(error)
+   }
+  } else {
+    res.json('cahnges failed')
+  }
+})
 
-// // post
-// app.get("/api/posts", async (req, res) => {
-//   console.log("calling");
 
-//   try {
-//     const result = await db.query(
-//       "SELECT * from instapost JOIN users ON instapost.username = users.username "
-//     );
-//     res.json(result.rows);
-//   } catch (error) {
-//     res.json(error);
-//   }
-// });
+// for addpost
+app.post("/api/addpost", async (req, res) => {
+  let { id, username, post, caption } = req.body;
+  let t = new Date();
+  let time = t.getTime();
+  try {
+    await db.query(
+      "INSERT INTO instapost(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
+      [id, req.session.user.username, post, [], caption, [], time]
+    );
+    res.json("success");
+  } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+});
 
-// app.get("/api/reels", async (req, res) => {
-//   try {
-//     const result = await db.query(
-//       "SELECT * from instareels JOIN users ON instareels.username = users.username"
-//     );
-//     res.json(result.rows);
-//   } catch (error) {
-//     res.json(error);
-//   }
-// });
 
-// app.post("/api/reset", async (req, res) => {
-//   const result = await db.query("SELECT * FROM users WHERE email = $1", [
-//     req.body.email,
-//   ]);
-//   if (result.rows.length > 0) {
-//     emailOtp = Math.round(1000 + Math.random() * 9000);
-//     registeredEmail = req.body.email;
-//     console.log(emailOtp);
-//     SendMail(emailOtp, registeredEmail);
-//     res.json(true);
-//   } else {
-//     res.json(false);
-//   }
-// });
+// for add reel
+app.post("/api/addreel", async (req, res) => {
+  let { id, post, caption } = req.body;
+  let t = new Date();
+  let time = t.getTime();
+  try {
+    await db.query(
+      "INSERT INTO instareels(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
+      [id, req.session.user.username, post, [], caption, [], time]
+    );
+    res.json("success");
+  } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+});
 
-// app.post("/api/resetpassword", async (req, res) => {
-//   const { password1, OTP } = req.body;
-//   if (OTP == emailOtp) {
-//     try {
-//       bcrypt.hash(password1, saltRound, async (err, hash) => {
-//         if (err) {
-//           console.log(err);
-//           res.json(false);
-//         } else {
-//           await db.query("UPDATE users SET password = $1 WHERE email = $2", [
-//             hash,
-//             registeredEmail,
-//           ]);
-//           res.json(true);
-//         }
-//       });
-//     } catch (error) {
-//       console.log("not working");
-//       res.json(false);
-//     }
-//   } else {
-//     res.json(false);
-//   }
-// });
 
-// //for story
-// app.get("/api/story/:id", async (req, res) => {
-//   try {
-//     const result = await db.query(
-//       "SELECT * FROM instastory JOIN users on instastory.username = users.username WHERE id = $1",
-//       [req.params.id]
-//     );
-//     result.rows[0].password = null;
-//     result.rows[0].email = null;
+//Search user
+app.post("/api/search", async (req, res) => {
+  try {
+    let result = await db.query(
+      "SELECT username,profile from users WHERE LOWER(username) LIKE '%' || $1 || '%'",
+      [req.body.search]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-//     res.json(result.rows[0]);
-//   } catch (error) {
-//     res.json(error);
-//   }
-// });
 
-// app.get("/api/stories", async (req, res) => {
-//   const result = await db.query(
-//     "SELECT instastory.username, id, story, profile FROM instastory JOIN users on instastory.username = users.username"
-//   );
-//   res.json(result.rows);
-// });
+// post
+app.get("/api/posts", async (req, res) => {
+  console.log('calling');
 
-// // upload Story
-// app.post("/api/uploadstory", async (req, res) => {
-//   const { story, id, type } = req.body;
-//   const time = Math.round(Date.now() / 10000);
-//   if (req.session.user) {
-//     try {
-//       await db.query(
-//         "INSERT INTO instastory(story,time,username,id,viewer,type) VALUES($1,$2,$3,$4,$5,$6)",
-//         [story, time, req.session.user.username, id, [], type]
-//       );
-//       res.json("Successfully Uploaded");
-//     } catch (error) {
-//       res.json("Technical Error");
-//     }
-//   } else {
-//     res.json("Login First");
-//   }
-// });
+  try {
+    const result = await db.query("SELECT * from instapost JOIN users ON instapost.username = users.username ");
+    res.json(result.rows);
+  } catch (error) {
+    res.json(error)
+  }
+});
 
-// // for single post
-// app.get("/api/post/:id", async (req, res) => {
-//   try {
-//     let result = await db.query("SELECT * FROM instapost WHERE id = $1", [
-//       req.params.id,
-//     ]);
-//     res.json(result.rows[0]);
-//   } catch (error) {
-//     res.json(error);
-//   }
-// });
+app.get("/api/reels", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * from instareels JOIN users ON instareels.username = users.username");
+    res.json(result.rows);
+  } catch (error) {
+    res.json(error)
+  }
+});
 
-// app.get("/api/reel/:id", async (req, res) => {
-//   try {
-//     let result = await db.query("SELECT * FROM instareels WHERE id = $1", [
-//       req.params.id,
-//     ]);
-//     res.json(result.rows[0]);
-//   } catch (error) {
-//     console.log(error);
-//     res.json(error);
-//   }
-// });
+app.post('/api/reset',async (req,res)=>{
+  const result = await db.query("SELECT * FROM users WHERE email = $1",[req.body.email])
+  if (result.rows.length > 0) {
+    emailOtp = Math.round(1000+Math.random()*9000)
+    registeredEmail = req.body.email
+    console.log(emailOtp);
+    SendMail(emailOtp , registeredEmail)
+    res.json(true)
+  } else {
+    res.json(false)
+  }
+})
 
-// //like post
-// app.get("/api/like/:id", async (req, res) => {
-//   let id = req.params.id;
-//   if (req.session.user) {
-//     try {
-//       await db.query(
-//         "UPDATE instapost SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2",
-//         [req.session.user.username, id]
-//       );
-//     } catch (error) {
-//       console.log(error);
-//     }
-//     res.json(true);
-//   } else {
-//     res.json(false);
-//   }
-// });
-// //dislike
-// app.get("/api/dislike/:id", async (req, res) => {
-//   let id = req.params.id;
-//   if (req.session.user) {
-//     try {
-//       await db.query(
-//         "UPDATE instapost SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2",
-//         [req.session.user.username, id]
-//       );
-//     } catch (error) {
-//       console.log(error);
-//     }
-//     res.json(false);
-//   } else {
-//     res.json(false);
-//   }
-// });
+app.post('/api/resetpassword', async (req,res)=>{
+const {password1, OTP} = req.body;
+if (OTP == emailOtp) {
+  
+  try {
+    bcrypt.hash(password1, saltRound, async (err, hash) => {
+            if (err) {
+              console.log(err);
+              res.json(false)
+            } else {
+              await db.query(
+                "UPDATE users SET password = $1 WHERE email = $2",
+                [hash, registeredEmail]
+              );
+              res.json(true)
+             
+            }
+          });
+  
+    } catch (error) {
+      console.log('not working');
+      res.json(false);
+    }
+}
+else{
+  res.json(false)
+}
+})
 
-// // comment
-// app.post("/api/addcomment/:id", async (req, res) => {
-//   if (req.session.user) {
-//     let id = req.params.id;
-//     let comment = {
-//       username: req.session.user.username,
-//       addcmt: req.body.addcmt,
-//     };
-//     try {
-//       await db.query(
-//         "UPDATE instapost SET comments = ARRAY_APPEND(comments,$1) WHERE id = $2",
-//         [comment, id]
-//       );
-//       res.json("success");
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   } else {
-//     res.json("log in first");
-//   }
-// });
+//for story
+app.get('/api/story/:id',async (req,res)=>{
+try {
+  const result = await db.query('SELECT * FROM instastory JOIN users on instastory.username = users.username WHERE id = $1', [req.params.id])
+  result.rows[0].password = null
+  result.rows[0].email = null
+  
+  res.json(result.rows[0])
+} catch (error) {
+  res.json(error)
+}
 
-// //like post
-// app.get("/api/likeReel/:id", async (req, res) => {
-//   let id = req.params.id;
-//   if (req.session.user) {
-//     try {
-//       await db.query(
-//         "UPDATE instaReels SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2",
-//         [req.session.user.username, id]
-//       );
-//     } catch (error) {
-//       console.log(error);
-//     }
-//     res.json(true);
-//   } else {
-//     res.json(false);
-//   }
-// });
-// //dislike
-// app.get("/api/dislikeReel/:id", async (req, res) => {
-//   let id = req.params.id;
-//   if (req.session.user) {
-//     try {
-//       await db.query(
-//         "UPDATE instareels SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2",
-//         [req.session.user.username, id]
-//       );
-//     } catch (error) {
-//       console.log(error);
-//     }
-//     res.json(false);
-//   } else {
-//     res.json(false);
-//   }
-// });
+})
 
-// // comment
-// app.post("/api/addcommentReel/:id", async (req, res) => {
-//   if (req.session.user) {
-//     let id = req.params.id;
-//     let comment = {
-//       username: req.session.user.username,
-//       addcmt: req.body.addcmt,
-//     };
-//     try {
-//       await db.query(
-//         "UPDATE instareels SET comments = ARRAY_APPEND(comments,$1) WHERE id = $2",
-//         [comment, id]
-//       );
-//       res.json("success");
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   } else {
-//     res.json("log in first");
-//   }
-// });
+app.get('/api/stories',async (req,res)=>{
+  const result = await db.query('SELECT instastory.username, id, story, profile FROM instastory JOIN users on instastory.username = users.username')
+  res.json(result.rows)
 
-// //for follow unfollow
-// app.post("/api/follow", async (req, res) => {
-//   let { user } = req.body;
-//   if (req.session.user && req.session.user.username != user) {
-//     await db.query(
-//       "UPDATE userdata SET followers = ARRAY_APPEND(followers,$1) WHERE username = $2",
-//       [req.session.user.username, user]
-//     );
-//     await db.query(
-//       "UPDATE userdata SET following = ARRAY_APPEND(following,$1) WHERE username = $2",
-//       [user, req.session.user.username]
-//     );
-//     res.json("followed");
-//   } else {
-//     res.json("req failed");
-//   }
-// });
+})
 
-// app.post("/api/unfollow", async (req, res) => {
-//   let { user } = req.body;
-//   if (req.session.user && req.session.user.username != user) {
-//     await db.query(
-//       "UPDATE userdata SET followers = ARRAY_REMOVE(followers,$1) WHERE username = $2",
-//       [req.session.user.username, user]
-//     );
-//     await db.query(
-//       "UPDATE userdata SET following = ARRAY_REMOVE(following,$1) WHERE username = $2",
-//       [user, req.session.user.username]
-//     );
-//     res.json("unfollowed");
-//   } else {
-//     res.json("req failed");
-//   }
-// });
+// upload Story
+app.post('/api/uploadstory', async (req,res)=>{
+const {story, id, type} = req.body
+const time =  Math.round(Date.now() /10000)
+if (req.session.user) {
+  try {
+    
+  await db.query('INSERT INTO instastory(story,time,username,id,viewer,type) VALUES($1,$2,$3,$4,$5,$6)',[
+    story, time, req.session.user.username, id, [], type 
+  ])
+res.json('Successfully Uploaded')
+    
+  } catch (error) {
+    res.json('Technical Error')
+  }
+} else {
+res.json('Login First')
+}
+})
 
-// // for register
-// app.post("/api/register", async (req, res) => {
-//   let { username, password, OTP } = req.body;
-//   if (OTP == emailOtp) {
-//     try {
-//       const result = await db.query("SELECT * FROM users WHERE username = $1", [
-//         username,
-//       ]);
-//       const mail = await db.query("SELECT * FROM users WHERE email = $1", [
-//         registeredEmail,
-//       ]);
 
-//       if (result.rows.length === 0) {
-//         if (mail.rows.length === 0) {
-//           bcrypt.hash(password, saltRound, async (err, hash) => {
-//             if (err) {
-//               res.json("Technical Error");
-//             } else {
-//               await db.query(
-//                 "INSERT INTO users(username,password,email) VALUES($1, $2, $3)",
-//                 [
-//                   username.toLowerCase().trim(),
-//                   hash,
-//                   registeredEmail.toLowerCase().trim(),
-//                 ]
-//               );
-//               await db.query(
-//                 "INSERT INTO userdata(username,fname,lname) VALUES($1, $1, '')",
-//                 [username.toLowerCase().trim()]
-//               );
-//             }
-//           });
-//           res.json("USER CREATED");
-//         } else {
-//           res.json("Email already registered");
-//         }
-//       } else {
-//         res.json("USER ALREADY EXIST");
-//       }
-//     } catch (error) {
-//       res.json(error);
-//     }
-//   } else {
-//     res.json("Wrong OTP");
-//   }
-// });
+// for single post
+app.get("/api/post/:id", async (req, res) => {
+  try {
+    let result = await db.query("SELECT * FROM instapost WHERE id = $1", [
+      req.params.id,
+    ]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.json(error);
+  }
+});
 
-// // to genrate email otp
-// app.post("/api/emailRegistration", (req, res) => {
-//   emailOtp = Math.round(1000 + Math.random() * 9000);
-//   registeredEmail = req.body.email;
-//   SendMail(emailOtp, registeredEmail);
-//   res.json(true);
-// });
+app.get("/api/reel/:id", async (req, res) => {
+  try {
+    let result = await db.query("SELECT * FROM instareels WHERE id = $1", [
+      req.params.id,
+    ]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+});
 
-// // for logout
-// app.get("/api/logout", async (req, res) => {
-//   try {
-//     await req.session.destroy();
-//   } catch (err) {
-//     console.error("Error logging out:", err);
-//     return next(new Error("Error logging out"));
-//   }
-//   res.json({ isLoggedin: false });
-// });
 
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).send("Internal Server Error");
-// });
+//like post
+app.get('/api/like/:id',async(req,res)=>{
+ let id = req.params.id
+ if (req.session.user) {
+try {
+    await db.query('UPDATE instapost SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+} catch (error) {
+  console.log(error);
+} 
+res.json(true)
 
-// app.get("*", (req, res) => {
-//   res.send("created by Tushar");
-// });
+ } else {
+  res.json(false)
+ }
+})
+//dislike
+app.get('/api/dislike/:id',async(req,res)=>{
+ let id = req.params.id
+ if (req.session.user) {
+try {
+    await db.query('UPDATE instapost SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+} catch (error) {
+  console.log(error);
+} 
+res.json(false)
+
+ } else {
+  res.json(false)
+ }
+})
+
+// comment
+app.post("/api/addcomment/:id", async (req, res) => {
+  
+  if (req.session.user) {
+  let id = req.params.id;
+  let comment = {
+    username: req.session.user.username,
+    addcmt: req.body.addcmt,
+  };
+    try {
+      await db.query(
+        "UPDATE instapost SET comments = ARRAY_APPEND(comments,$1) WHERE id = $2",
+        [comment, id]
+      );
+      res.json("success");
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    res.json("log in first")
+  }
+});
+
+//like post
+app.get('/api/likeReel/:id',async(req,res)=>{
+  let id = req.params.id
+  if (req.session.user) {
+ try {
+     await db.query('UPDATE instaReels SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+ } catch (error) {
+   console.log(error);
+ } 
+ res.json(true)
+ 
+  } else {
+   res.json(false)
+  }
+ })
+ //dislike
+ app.get('/api/dislikeReel/:id',async(req,res)=>{
+  let id = req.params.id
+  if (req.session.user) {
+ try {
+     await db.query('UPDATE instareels SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+ } catch (error) {
+   console.log(error);
+ } 
+ res.json(false)
+ 
+  } else {
+   res.json(false)
+  }
+ })
+ 
+ // comment
+ app.post("/api/addcommentReel/:id", async (req, res) => {
+  if (req.session.user) {
+  let id = req.params.id;
+  let comment = {
+    username: req.session.user.username,
+    addcmt: req.body.addcmt,
+  };
+    try {
+      await db.query(
+        "UPDATE instareels SET comments = ARRAY_APPEND(comments,$1) WHERE id = $2",
+        [comment, id]
+      );
+      res.json("success");
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    res.json("log in first")
+  }
+ });
+ 
+
+
+
+//for follow unfollow
+app.post("/api/follow", async (req, res) => {
+  let { user } = req.body;
+  if (req.session.user && req.session.user.username != user) {
+    await db.query(
+      "UPDATE userdata SET followers = ARRAY_APPEND(followers,$1) WHERE username = $2",
+      [req.session.user.username, user]
+    );
+    await db.query(
+      "UPDATE userdata SET following = ARRAY_APPEND(following,$1) WHERE username = $2",
+      [user, req.session.user.username]
+    );
+    res.json("followed");
+  } else {
+    res.json("req failed");
+  }
+});
+
+app.post("/api/unfollow", async (req, res) => {
+  let { user } = req.body;
+  if (req.session.user && req.session.user.username != user) {
+    await db.query(
+      "UPDATE userdata SET followers = ARRAY_REMOVE(followers,$1) WHERE username = $2",
+      [req.session.user.username, user]
+    );
+    await db.query(
+      "UPDATE userdata SET following = ARRAY_REMOVE(following,$1) WHERE username = $2",
+      [user, req.session.user.username]
+    );
+    res.json("unfollowed");
+  } else {
+    res.json("req failed");
+  }
+});
+
+
+
+// for register
+app.post("/api/register", async (req, res) => {
+  let { username, password, OTP } = req.body;
+if (OTP == emailOtp) {
+  
+    try {
+      const result = await db.query("SELECT * FROM users WHERE username = $1", [
+        username,
+      ]);
+      const mail = await db.query("SELECT * FROM users WHERE email = $1", [
+        registeredEmail,
+      ]);
+  
+      if (result.rows.length === 0) {
+        if (mail.rows.length === 0) {
+          bcrypt.hash(password, saltRound, async (err, hash) => {
+            if (err) {
+              res.json("Technical Error");
+            } else {
+              await db.query(
+                "INSERT INTO users(username,password,email) VALUES($1, $2, $3)",
+                [username.toLowerCase().trim(), hash, registeredEmail.toLowerCase().trim()]
+              );
+              await db.query(
+                "INSERT INTO userdata(username,fname,lname) VALUES($1, $1, '')",
+                [username.toLowerCase().trim()]
+              );
+            }
+          });
+          res.json("USER CREATED");
+        } else {
+          res.json("Email already registered");
+        }
+      } else {
+        res.json("USER ALREADY EXIST");
+      }
+    } catch (error) {
+      res.json(error);
+    }
+} else {
+  res.json('Wrong OTP')
+}
+});
+
+// to genrate email otp
+app.post('/api/emailRegistration',(req,res)=>{
+  emailOtp = Math.round(1000+Math.random()*9000)
+  registeredEmail = req.body.email
+  SendMail(emailOtp , registeredEmail)
+  res.json(true)
+})
+
+
+
+// for logout
+app.get("/api/logout", async (req, res) => {
+  try {
+        await req.session.destroy();
+    } catch (err) {
+        console.error('Error logging out:', err);
+        return next(new Error('Error logging out'));
+    }
+  res.json({ isLoggedin: false });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Internal Server Error');
+});
+
+
+app.get('*',(req,res)=>{
+  res.send("created by Tushar")
+})
 
 app.listen(port, () => {
   console.log(`Running on Port ${port}`);
