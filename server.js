@@ -19,13 +19,17 @@ let emailOtp = null
 let registeredEmail = null
 
 // mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
+app.use(cookieParser());
+
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
   secret: 'keyboard cat',
-  resave: false,
+  resave: true,
   saveUninitialized: true,
   cookie: { secure: true }
 }))
+
+
 
 
 // const corsOptions = {
