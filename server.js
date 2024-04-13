@@ -29,15 +29,17 @@ app.use(session({
 }));
 
 
-const corsOptions = {
-  origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-  credentials: true, // Allow credentials (cookies, authentication headers)
-};
+
+
+// const corsOptions = {
+//   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
+//   methods: ['GET', 'POST'],
+//   allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+//   credentials: true, // Allow credentials (cookies, authentication headers)
+// };
 
 // Enable CORS with the specified options
-app.use(cors(corsOptions));
+    app.use(cors());
 
 
 const { Pool } = pg;
