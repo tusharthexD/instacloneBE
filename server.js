@@ -7,8 +7,8 @@ import {SendMail} from './SendMail.js'
 import multer from 'multer'
 import ffmpeg from "fluent-ffmpeg";
 import dotenv from 'dotenv'
-import session from "express-session";
-import MongoStore from "connect-mongo";
+import jwt from 'jsonwebtoken';
+
 
 const app = express();
 const port = process.env.port || 3000;
@@ -17,26 +17,10 @@ const saltRound = 4;
 let emailOtp = null
 let registeredEmail = null
 
-// mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
-// app.use(cookieParser());
+const JWT_SECRET = 'tusharspamz';
 
-app.use(session({
-  secret: 'secret',
-  proxy: true,
-  resave: false,
-  saveUninitialized: true,
-  withCredentials: true,
-  cookie: { secure: false, maxAge: 6000000, sameSite : "none" },
-  store: MongoStore.create({
-    mongoUrl: 'mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0',
-  })  
-}));
-// const corsOptions = {
-//   origin: ['http://localhost:5173', 'https://instagramclone-drab.vercel.app'], // Allow requests only from this origin
-//   methods: ['GET', 'POST'],
-//   allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-//   credentials: true, // Allow credentials (cookies, authentication headers)
-// };
+// mongodb+srv://tusharsuthar6:mVDriDKn6BlIIFxi@cluster0.rajtgmf.mongodb.net/mySessions?retryWrites=true&w=majority&appName=Cluster0
+
 
 // Enable CORS with the specified options
 app.use(cors({
@@ -68,6 +52,45 @@ let hours = Math.round(Date.now() / hour);
 
 // Multer configuration for file upload
 const upload = multer({ dest: 'uploads/' });
+
+
+//authenticate for login onlyy
+function authenticateToken(req, res, next) {
+  console.log('auth calling');
+  const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+  if (!token) {
+    req.isAuthenticated = false;
+    return next();
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.send({isLoggedin : false});
+    }
+    req.user = user;
+    req.isAuthenticated = true;
+    next();
+  });
+}
+
+function authenticateUser(req, res, next) {
+  const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+  req.isLoggedIn = !!token; // Set isLoggedIn based on token existence
+
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (err) {
+        req.isLoggedIn = false; // Set isLoggedIn to false if token is invalid
+      } else {
+        req.user = user;
+      }
+      next();
+    });
+  } else {
+    req.user = user;
+    next(); // Continue to next middleware/route handler
+  }
+}
 
 // Endpoint for video trimming
 app.post('/api/trim', upload.single('video'),(req, res) => {
@@ -101,6 +124,7 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 
 // for login
 app.post("/api/login", async (req, res) => {
+  console.log('login calling');
   const { username, password } = req.body;
   try {
     const result = await db.query("SELECT * FROM users WHERE username = $1", [
@@ -111,15 +135,15 @@ app.post("/api/login", async (req, res) => {
     if (result.rows.length > 0) {
       bcrypt.compare(password, loginPsw, async (err, valid) => {
         if (valid) {
+         
+         
+          const token = jwt.sign({username: result.rows[0].username, profile: result.rows[0].profile }, JWT_SECRET, { expiresIn: '1d' });
+          res.json({ 
+            message: "User Loggedin",
+            token: token });
 
-          req.session.user = {username : result.rows[0].username, profile :result.rows[0].profile };
-   
-    console.log(req.session ,'sucess');
-          res.json({
-            isLoggedin: true,
-            message:
-              "You're Logged in",
-          });
+
+
         } else if (err) {
           console.log('not sucess');
           res.json({ isLoggedin: false, message: err });
@@ -145,22 +169,21 @@ app.get('/',(req,res)=>{
   res.send("created by Tushar")
 })
 
-app.get("/api/", (req, res) => {
-  console.log(req.session,'ye dekhoooooo');
+app.get("/api/",authenticateToken, (req, res)=>{
+  console.log('apillll calling');
 
-  if (req.session.user) {
-    console.log('logged in success');
-
-    let { username, profile } = req.session.user;
-    res.send({ isLoggedin: true, user: username, profile: profile });
+  if (req.isAuthenticated) {
+    const {username, profile} = req.user;
+     res.json({ isLoggedin: true, username: username, profile: profile });
   } else {
-    console.log('failed log in');
-    res.send({ isLoggedin: false });
+    console.log('not logg in');
+    res.send({isLoggedin: false})
   }
 });
 
 
-app.post("/api/profile", async (req, res) => {
+app.post("/api/profile", authenticateUser, async (req, res) => {
+  console.log(req.user,'maiii h sala')
   const result = await db.query(
     "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
     [req.body.id]
@@ -169,20 +192,27 @@ app.post("/api/profile", async (req, res) => {
   let data = {
     user: result.rows[0],
     isFollowed: false,
-    isLoggedin: false,
+    isLoggedin: req.isLoggedIn,
     myProfile: false,
   };
   if (result.rows.length > 0) {
-       if (req.session.user) {
-               data.isLoggedin = true;
-                if (req.session.user.username == data.user.username) data.myProfile = true;
+       if (data.isLoggedin) {
+                if (req.user.username == data.user.username){
+                  data.myProfile = true;
+                }
+                console.log(req.user.username,'ye haaaaaaiii');
+
                   if (data.user.followers) {
                      let ress = data.user.followers.find(
-                     (e) => e == req.session.user.username);
+                     (e) => e == req.user.username);
                      if(ress) data.isFollowed = true
-                    }}
+                    }
+                    res.json(data)
+                  } else {
+                    res.json(data)
+                  }
                       
-      res.json(data)
+      
   } else {
    res.json(null);
   }
@@ -198,11 +228,11 @@ app.post("/api/profile/posts", async (req, res) => {
   res.json(result.rows);
 });
 
-app.get('/api/profile/edit',async (req,res)=>{
-  if (req.session.user) {
+app.get('/api/profile/edit',authenticateUser,async (req,res)=>{
+  if (req.user) {
     const result = await db.query(
     "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
-    [req.session.user.username]
+    [req.user.username]
   )
     result.rows[0].password = undefined
     res.json(result.rows[0])
@@ -211,16 +241,16 @@ app.get('/api/profile/edit',async (req,res)=>{
   }
 })
 //update profile
-app.post('/api/profile/edit',async (req,res)=>{
+app.post('/api/profile/edit',authenticateUser,async (req,res)=>{
   let {profile,fname,lname,bio,website} = req.body
-  if (req.session.user) {
+  if (req.user) {
    try {
      await db.query(
      "UPDATE users SET profile = $1 WHERE username = $2",
-     [profile, req.session.user.username])
+     [profile, req.user.username])
      await db.query(
      "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
-     [fname, lname,bio,website, req.session.user.username])
+     [fname, lname,bio,website, req.user.username])
      res.json("Changes Saved")
 
    } catch (error) {
@@ -241,7 +271,7 @@ app.post("/api/addpost", async (req, res) => {
   try {
     await db.query(
       "INSERT INTO instapost(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
-      [id, req.session.user.username, post, [], caption, [], time]
+      [id, req.user.username, post, [], caption, [], time]
     );
     res.json("success");
   } catch (error) {
@@ -259,7 +289,7 @@ app.post("/api/addreel", async (req, res) => {
   try {
     await db.query(
       "INSERT INTO instareels(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
-      [id, req.session.user.username, post, [], caption, [], time]
+      [id, req.user.username, post, [], caption, [], time]
     );
     res.json("success");
   } catch (error) {
@@ -367,14 +397,14 @@ app.get('/api/stories',async (req,res)=>{
 })
 
 // upload Story
-app.post('/api/uploadstory', async (req,res)=>{
+app.post('/api/uploadstory',authenticateUser, async (req,res)=>{
 const {story, id, type} = req.body
 const time =  Math.round(Date.now() /10000)
-if (req.session.user) {
+if (req.user) {
   try {
     
   await db.query('INSERT INTO instastory(story,time,username,id,viewer,type) VALUES($1,$2,$3,$4,$5,$6)',[
-    story, time, req.session.user.username, id, [], type 
+    story, time, req.user.username, id, [], type 
   ])
 res.json('Successfully Uploaded')
     
@@ -413,11 +443,11 @@ app.get("/api/reel/:id", async (req, res) => {
 
 
 //like post
-app.get('/api/like/:id',async(req,res)=>{
+app.get('/api/like/:id',authenticateUser,async(req,res)=>{
  let id = req.params.id
- if (req.session.user) {
+ if (req.user) {
 try {
-    await db.query('UPDATE instapost SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+    await db.query('UPDATE instapost SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.user.username,id]) 
 } catch (error) {
   console.log(error);
 } 
@@ -428,11 +458,11 @@ res.json(true)
  }
 })
 //dislike
-app.get('/api/dislike/:id',async(req,res)=>{
+app.get('/api/dislike/:id',authenticateUser,async(req,res)=>{
  let id = req.params.id
- if (req.session.user) {
+ if (req.user) {
 try {
-    await db.query('UPDATE instapost SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+    await db.query('UPDATE instapost SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.user.username,id]) 
 } catch (error) {
   console.log(error);
 } 
@@ -444,12 +474,12 @@ res.json(false)
 })
 
 // comment
-app.post("/api/addcomment/:id", async (req, res) => {
+app.post("/api/addcomment/:id",authenticateUser, async (req, res) => {
   
-  if (req.session.user) {
+  if (req.user) {
   let id = req.params.id;
   let comment = {
-    username: req.session.user.username,
+    username: req.user.username,
     addcmt: req.body.addcmt,
   };
     try {
@@ -467,11 +497,11 @@ app.post("/api/addcomment/:id", async (req, res) => {
 });
 
 //like post
-app.get('/api/likeReel/:id',async(req,res)=>{
+app.get('/api/likeReel/:id',authenticateUser,async(req,res)=>{
   let id = req.params.id
-  if (req.session.user) {
+  if (req.user) {
  try {
-     await db.query('UPDATE instaReels SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+     await db.query('UPDATE instaReels SET likes = ARRAY_APPEND(likes,$1) WHERE id = $2',[req.user.username,id]) 
  } catch (error) {
    console.log(error);
  } 
@@ -482,11 +512,11 @@ app.get('/api/likeReel/:id',async(req,res)=>{
   }
  })
  //dislike
- app.get('/api/dislikeReel/:id',async(req,res)=>{
+ app.get('/api/dislikeReel/:id',authenticateUser,async(req,res)=>{
   let id = req.params.id
-  if (req.session.user) {
+  if (req.user) {
  try {
-     await db.query('UPDATE instareels SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.session.user.username,id]) 
+     await db.query('UPDATE instareels SET likes = ARRAY_REMOVE(likes,$1) WHERE id = $2',[req.user.username,id]) 
  } catch (error) {
    console.log(error);
  } 
@@ -498,11 +528,11 @@ app.get('/api/likeReel/:id',async(req,res)=>{
  })
  
  // comment
- app.post("/api/addcommentReel/:id", async (req, res) => {
-  if (req.session.user) {
+ app.post("/api/addcommentReel/:id",authenticateUser, async (req, res) => {
+  if (req.user) {
   let id = req.params.id;
   let comment = {
-    username: req.session.user.username,
+    username: req.user.username,
     addcmt: req.body.addcmt,
   };
     try {
@@ -523,16 +553,16 @@ app.get('/api/likeReel/:id',async(req,res)=>{
 
 
 //for follow unfollow
-app.post("/api/follow", async (req, res) => {
+app.post("/api/follow",authenticateUser, async (req, res) => {
   let { user } = req.body;
-  if (req.session.user && req.session.user.username != user) {
+  if (req.user && req.user.username != user) {
     await db.query(
       "UPDATE userdata SET followers = ARRAY_APPEND(followers,$1) WHERE username = $2",
-      [req.session.user.username, user]
+      [req.user.username, user]
     );
     await db.query(
       "UPDATE userdata SET following = ARRAY_APPEND(following,$1) WHERE username = $2",
-      [user, req.session.user.username]
+      [user, req.user.username]
     );
     res.json("followed");
   } else {
@@ -540,16 +570,16 @@ app.post("/api/follow", async (req, res) => {
   }
 });
 
-app.post("/api/unfollow", async (req, res) => {
+app.post("/api/unfollow",authenticateUser, async (req, res) => {
   let { user } = req.body;
-  if (req.session.user && req.session.user.username != user) {
+  if (req.user && req.user.username != user) {
     await db.query(
       "UPDATE userdata SET followers = ARRAY_REMOVE(followers,$1) WHERE username = $2",
-      [req.session.user.username, user]
+      [req.user.username, user]
     );
     await db.query(
       "UPDATE userdata SET following = ARRAY_REMOVE(following,$1) WHERE username = $2",
-      [user, req.session.user.username]
+      [user, req.user.username]
     );
     res.json("unfollowed");
   } else {
@@ -611,18 +641,6 @@ app.post('/api/emailRegistration',(req,res)=>{
   res.json(true)
 })
 
-
-
-// for logout
-app.get("/api/logout", async (req, res) => {
-  try {
-        await req.session.destroy();
-    } catch (err) {
-        console.error('Error logging out:', err);
-        return next(new Error('Error logging out'));
-    }
-  res.json({ isLoggedin: false });
-});
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
