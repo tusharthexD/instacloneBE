@@ -39,8 +39,10 @@ app.use(session({
 // };
 
 // Enable CORS with the specified options
-    app.use(cors());
-
+app.use(cors({
+  origin: 'https://instagramclone-drab.vercel.app',
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+}));
 
 const { Pool } = pg;
 
