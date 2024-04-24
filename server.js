@@ -269,6 +269,7 @@ app.post("/api/addpost",authenticateUser, async (req, res) => {
   let { id, post, caption } = req.body;
   let t = new Date();
   let time = t.getTime();
+  console.log(req.user, 'in add post');
   if (req.user) {
     try {
       await db.query(
