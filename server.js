@@ -125,6 +125,7 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 // for login
 app.post("/api/login", async (req, res) => {
   console.log('login calling');
+  console.log(req.body);
   const { username, password } = req.body;
   try {
     const result = await db.query("SELECT * FROM users WHERE username = $1", [
@@ -264,26 +265,31 @@ app.post('/api/profile/edit',authenticateUser,async (req,res)=>{
 
 
 // for addpost
-app.post("/api/addpost", async (req, res) => {
-  let { id, username, post, caption } = req.body;
+app.post("/api/addpost",authenticateUser, async (req, res) => {
+  let { id, post, caption } = req.body;
   let t = new Date();
   let time = t.getTime();
-  try {
-    await db.query(
-      "INSERT INTO instapost(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
-      [id, req.user.username, post, [], caption, [], time]
-    );
-    res.json("success");
-  } catch (error) {
-    console.log(error);
-    res.json(error);
+  if (req.user) {
+    try {
+      await db.query(
+        "INSERT INTO instapost(id,username,post,likes,caption,comments,time) values($1,$2,$3,$4,$5,$6,$7)",
+        [id, req.user.username, post, [], caption, [], time]
+      );
+      res.json("success");
+    } catch (error) {
+      console.log(error);
+      res.json(error);
+    }
+  } else {
+    res.json('Login first')
   }
 });
 
 
 // for add reel
-app.post("/api/addreel", async (req, res) => {
-  let { id, post, caption } = req.body;
+app.post("/api/addreel",authenticateUser, async (req, res) => {
+  if (req.user) {
+    let { id, post, caption } = req.body;
   let t = new Date();
   let time = t.getTime();
   try {
@@ -295,6 +301,9 @@ app.post("/api/addreel", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.json(error);
+  }
+  } else {
+    res.json('login first')
   }
 });
 
