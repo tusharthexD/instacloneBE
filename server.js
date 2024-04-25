@@ -276,6 +276,24 @@ app.post("/api/addpost",authenticateUser, async (req, res) => {
   }
 });
 
+// remove post
+app.post('/api/deletepost',authenticateUser,async (req,res)=>{
+  const {id} = req.body
+ const response = await db.query("SELECT * FROM instapost WHERE id = $1",[id])
+ if(response.rows.length > 0){
+  if(response.rows[0].username = req.user.username){
+    try {
+      db.query("DELETE FROM instapost WHERE id = $1",[id])
+      res.send("Deleted Successfully")
+    } catch (error) {
+      console.log(error);
+      res.send("Technical error")
+    }
+  } else {
+    res.send("Login First")
+  }
+ }
+})
 
 // for add reel
 app.post("/api/addreel",authenticateUser, async (req, res) => {
@@ -297,6 +315,24 @@ app.post("/api/addreel",authenticateUser, async (req, res) => {
     res.json('login first')
   }
 });
+
+app.post('/api/deletereel',authenticateUser,async (req,res)=>{
+  const {id} = req.body
+ const response = await db.query("SELECT * FROM instapost WHERE id = $1",[id])
+ if(response.rows.length > 0){
+  if(response.rows[0].username = req.user.username){
+    try {
+      db.query("DELETE FROM instareel WHERE id = $1",[id])
+      res.send("Deleted Successfully")
+    } catch (error) {
+      console.log(error);
+      res.send("Technical error")
+    }
+  } else {
+    res.send("Login First")
+  }
+ }
+})
 
 
 //Search user
