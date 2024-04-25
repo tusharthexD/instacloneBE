@@ -248,14 +248,14 @@ app.post('/api/profile/edit',authenticateUser,async (req,res)=>{
      await db.query(
      "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
      [fname, lname,bio,website, req.user.username])
-     res.json("Changes Saved")
+     res.send(true)
 
    } catch (error) {
     console.log(error)
     res.json(error)
    }
   } else {
-    res.json('cahnges failed')
+    res.send(false)
   }
 })
 
