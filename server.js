@@ -235,6 +235,7 @@ app.get('/api/profile/edit',authenticateUser,async (req,res)=>{
 app.post('/api/profile/edit',authenticateUser,async (req,res)=>{
   let {profile,fname,lname,bio,website} = req.body
   if (req.user) {
+    console.log(req.body, ' call to kar raha h');
    try {
      await db.query(
      "UPDATE users SET profile = $1 WHERE username = $2",
@@ -242,6 +243,7 @@ app.post('/api/profile/edit',authenticateUser,async (req,res)=>{
      await db.query(
      "UPDATE userdata SET fname = $1, lname = $2, bio = $3, website = $4 WHERE username = $5",
      [fname, lname,bio,website, req.user.username])
+     console.log('response bhi bhejaaa');
      res.send(true)
 
    } catch (error) {
@@ -249,6 +251,7 @@ app.post('/api/profile/edit',authenticateUser,async (req,res)=>{
     res.json(error)
    }
   } else {
+    console.log('failde');
     res.send(false)
   }
 })
