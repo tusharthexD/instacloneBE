@@ -122,8 +122,6 @@ app.post('/api/trim', upload.single('video'),(req, res) => {
 
 // for login
 app.post("/api/login", async (req, res) => {
-  console.log('login calling');
-  console.log(req.body);
   const { username, password } = req.body;
   try {
     const result = await db.query("SELECT * FROM users WHERE username = $1", [
@@ -144,10 +142,8 @@ app.post("/api/login", async (req, res) => {
 
 
         } else if (err) {
-          console.log('not sucess');
           res.json({ isLoggedin: false, message: err });
         } else {
-          console.log('failed');
           res.json({
             isLoggedin: false,
             message:
@@ -180,7 +176,6 @@ app.get("/api/",authenticateToken, (req, res)=>{
 
 
 app.post("/api/profile", authenticateUser, async (req, res) => {
-  console.log(req.user,'maiii h sala')
   const result = await db.query(
     "SELECT * FROM users join userdata as ud ON ud.username = users.username WHERE users.username = $1",
     [req.body.id]
@@ -197,7 +192,6 @@ app.post("/api/profile", authenticateUser, async (req, res) => {
                 if (req.user.username == data.user.username){
                   data.myProfile = true;
                 }
-                console.log(req.user.username,'ye haaaaaaiii');
 
                   if (data.user.followers) {
                      let ress = data.user.followers.find(
@@ -321,7 +315,6 @@ app.post("/api/search", async (req, res) => {
 
 // post
 app.get("/api/posts", async (req, res) => {
-  console.log('calling');
 
   try {
     const result = await db.query("SELECT * from instapost JOIN users ON instapost.username = users.username ");
@@ -373,7 +366,6 @@ if (OTP == emailOtp) {
           });
   
     } catch (error) {
-      console.log('not working');
       res.json(false);
     }
 }
