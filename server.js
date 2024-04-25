@@ -56,7 +56,6 @@ const upload = multer({ dest: 'uploads/' });
 
 //authenticate for login onlyy
 function authenticateToken(req, res, next) {
-  console.log('auth calling');
   const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
   if (!token) {
     req.isAuthenticated = false;
@@ -75,21 +74,20 @@ function authenticateToken(req, res, next) {
 
 function authenticateUser(req, res, next) {
   const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-  req.isLoggedIn = !!token; // Set isLoggedIn based on token existence
-
-  if (token) {
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-      if (err) {
-        req.isLoggedIn = false; // Set isLoggedIn to false if token is invalid
-      } else {
-        req.user = user;
-      }
-      next();
-    });
-  } else {
-    req.user = user;
-    next(); // Continue to next middleware/route handler
+  if (!token) {
+    req.isLoggedIn = false;
+    return next();
   }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      req.isLoggedIn = false
+      next()
+    }
+    req.isLoggedIn = true;
+    req.user = user;
+    next();
+  });
 }
 
 // Endpoint for video trimming
@@ -171,13 +169,11 @@ app.get('/',(req,res)=>{
 })
 
 app.get("/api/",authenticateToken, (req, res)=>{
-  console.log('apillll calling');
 
   if (req.isAuthenticated) {
     const {username, profile} = req.user;
      res.json({ isLoggedin: true, username: username, profile: profile });
   } else {
-    console.log('not logg in');
     res.send({isLoggedin: false})
   }
 });
@@ -269,7 +265,7 @@ app.post("/api/addpost",authenticateUser, async (req, res) => {
   let { id, post, caption } = req.body;
   let t = new Date();
   let time = t.getTime();
-  console.log(req.user, 'in add post');
+
   if (req.user) {
     try {
       await db.query(
