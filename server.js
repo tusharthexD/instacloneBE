@@ -454,9 +454,10 @@ res.json('Login First')
 // for single post
 app.get("/api/post/:id", async (req, res) => {
   try {
-    let result = await db.query("SELECT * FROM instapost WHERE id = $1", [
+    let result = await db.query("SELECT * FROM instapost JOIN users ON instapost.username = users.username WHERE instapost.id = $1", [
       req.params.id,
     ]);
+    result.rows[0].password = null
     res.json(result.rows[0]);
   } catch (error) {
     res.json(error);
@@ -465,9 +466,10 @@ app.get("/api/post/:id", async (req, res) => {
 
 app.get("/api/reel/:id", async (req, res) => {
   try {
-    let result = await db.query("SELECT * FROM instareels WHERE id = $1", [
+    let result = await db.query("SELECT * FROM instareels JOIN users ON instareels.username = users.username WHERE instareels.id = $1", [
       req.params.id,
     ]);
+    result.rows[0].password = null
     res.json(result.rows[0]);
   } catch (error) {
     console.log(error);
